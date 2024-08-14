@@ -51,6 +51,8 @@ public class ChallengeVO {
 	private String mem_photo;
 	private String categoryName;
 	private Integer chal_phase;   //0:시작 전,1:진행 중,2:완료
+	private Integer fav;		  //좋아요 수
+	private Integer attendance;
 	
 	public void calculateChalEdate() {
 		LocalDate sdate = LocalDate.parse(chal_sdate,DateTimeFormatter.ISO_LOCAL_DATE);

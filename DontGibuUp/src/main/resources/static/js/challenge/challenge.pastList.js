@@ -91,13 +91,19 @@ $(function() {
 					now.setHours(0, 0, 0, 0); // 시간 부분을 0으로 설정
 					sdate.setHours(0, 0, 0, 0);
 
-					output += '<div class="col-lg-4 col-md-6 col-12 nanum" style="margin-bottom: 30px;">';
-					output += '<div class="custom-block-wrap">';
+					output += `<div class="col-lg-4 col-md-6 col-12 nanum">
+								<div class="each-chal">
+									<div class="custom-block-wrap">
+							  			<div class="image-wrapper">`;
 					if (item.chal_photo) {
 						output += '<img src="' + pageContext + '/upload/' + item.chal_photo + '" class="custom-block-image img-fluid" >'; //챌린지 썸네일
 					} else {
 						output += '<img src="' + pageContext + '/images/챌린지_기본이미지.jpg" class="custom-block-image img-fluid" >'; //챌린지 썸네일 - 기본 이미지
 					}
+					output += `<div class="fav-overlay">❤️ ${item.fav}</div>`;					
+					output += `<div class="participants-overlay"><i class="bi bi-person-fill"></i> ${item.attendance} 명</div>`;
+                    output += '</div>';
+                    
 					output += '<div class="custom-block">';
 					output += '<div class="custom-block-body">';
 					output += '<h5 class="mb-3">' + item.chal_title + '</h5>';
@@ -136,6 +142,7 @@ $(function() {
 					output += '<a href="detail?chal_num=' + item.chal_num + '" class="custom-btn btn">상세보기</a>';
 					output += '</div>';
 
+					output += '</div>';
 					output += '</div>';
 					output += '</div>';
 				});

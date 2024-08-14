@@ -116,6 +116,7 @@ public class ChallengeAjaxController {
 		mapJson.put("list", list);
 
 		// 각 챌린지에 대해 추가 정보를 조회하여 mapJson에 추가
+		/*
 		List<Map<String, Object>> challengeDetailsList = new ArrayList<>();
 		for (ChallengeVO challenge : list) {
 			Map<String, Object> challengeDetails = new HashMap<>();
@@ -137,7 +138,7 @@ public class ChallengeAjaxController {
 			challengeDetailsList.add(challengeDetails);
 		}
 		mapJson.put("challengeDetailsList", challengeDetailsList);
-
+		*/
 		return mapJson;
 	}
 

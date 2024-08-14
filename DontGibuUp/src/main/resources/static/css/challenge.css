@@ -2,6 +2,8 @@
 
 /* YJ */
 /* 챌린지 목록 */
+
+/*지금 이거 안 쓰고 있음*/
 .challenge-container {
 	display: flex;
 	flex-wrap: wrap;
@@ -9,27 +11,34 @@
 	margin: 0 auto; /* 중앙에 정렬 */
 	justify-content: space-around;
 }
-
-.result-display{
-	background-color: #f8f9fa;
-    padding: 30px;
+.each-chal{
+	margin-bottom: 30px;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+	border-radius: 1.2rem;
+}
+.image-wrapper {
+    position: relative;
+}
+.fav-overlay{
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: white;
+    padding: 5px 10px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
 }
-
-.chal_listElement {
-	flex: 0 1 150px;
-	margin: 10px 10px; /* 아래쪽에 간격을 둠 */
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
-	padding: 10px; /* 요소 내부 패딩 */
-	border-radius: 5px; /* 둥근 모서리 */
-	background-color: white; /* 배경색 */
+.participants-overlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 16px;
 }
-
-.listElement_content {
-	padding: 10px 10px;
-}
-
 /*챌린지 참가 회원 목록*/
 .verify-stats-nav {
 	margin-top: 20px;
@@ -351,21 +360,6 @@ input[type="radio"].custom-radio + label.custom-radio-label:hover {
     border-color: #999;
 }
 
-/* 챌린지 목록 */
-.image-wrapper {
-    position: relative;
-}
-
-.participants-overlay {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 16px;
-}
 /* 챌린지 상세 */
 .challenge-detail {
 	width: 50%;

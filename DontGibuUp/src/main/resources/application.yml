@@ -9,9 +9,9 @@ spring:
       
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@211.63.89.70:1521:xe
-    username: fuser01
-    password: f1234
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    username: yujin02
+    password: 1234
     hikari:
       connection-timeout: 30000 #클라이언트가 pool에 connection을 요청하는데 기다리는 최대시간을 설정 30초
       maximum-pool-size: 10 #최대 커넥션 개수 설정

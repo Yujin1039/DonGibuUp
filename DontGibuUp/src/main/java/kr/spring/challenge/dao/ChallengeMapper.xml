@@ -49,23 +49,13 @@
 				ORDER BY chal_num DESC
 			</when>
 			<when test="order == 1">
-				ORDER BY NVL((
-					SELECT COUNT(*)
-					FROM chal_fav cf
-					WHERE c.chal_num = cf.chal_num
-					GROUP BY cf.chal_num
-				),0) DESC
+				ORDER BY fav DESC
 			</when>
 			<when test="order == 2">
 				ORDER BY chal_sdate ASC
 			</when>
 			<when test="order == 3">
-				ORDER BY (
-					SELECT COUNT(*)
-                	FROM chal_join cj
-                	WHERE cj.chal_num = c.chal_num
-                	GROUP BY cj.chal_num
-				) DESC
+				ORDER BY attendance DESC
 			</when>
 		</choose>
 	</sql>
@@ -84,12 +74,24 @@
 		SELECT * FROM(
 		SELECT a.*,rownum rnum FROM(
 		SELECT
-		c.*,m.mem_nick,md.mem_photo FROM challenge c
+		c.*,m.mem_nick,md.mem_photo,
+		NVL((
+			SELECT 
+				COUNT(*)
+			FROM chal_fav cf
+			WHERE c.chal_num = cf.chal_num
+			GROUP BY cf.chal_num
+				),0) fav,
+		(SELECT 
+			COUNT(*)
+         FROM chal_join cj
+         WHERE cj.chal_num = c.chal_num
+         GROUP BY cj.chal_num) attendance
+		FROM challenge c
 		JOIN member m ON
 		c.mem_num=m.mem_num
 		LEFT OUTER JOIN member_detail md ON
 		c.mem_num=md.mem_num
-		<!-- 검색 조건 sql문 -->
 		<include refid="challengeSearch"></include>
 		<include refid="challengeSort"></include>
 		)a
@@ -107,8 +109,7 @@
 		FROM challenge c
 		JOIN member m ON
 		c.mem_num = m.mem_num
-		LEFT OUTER JOIN member_detail md ON c.mem_num =
-		md.mem_num
+		LEFT OUTER JOIN member_detail md ON c.mem_num = md.mem_num
 		<!-- 후기 join -->
 		<!-- 좋아요 join -->
 		WHERE c.chal_num = #{chal_num}

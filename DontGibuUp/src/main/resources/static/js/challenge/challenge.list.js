@@ -84,36 +84,34 @@ $(function() {
                 }
                 //챌린지 목록 작업
                 let output = '';
-                $(param.challengeDetailsList).each(function(index, item) {
+                $(param.list).each(function(index, item) {
                     realIdx = (page - 1) * rowCount + index;
-                    let challenge = item.challenge;
-                    let isJoined = item.isJoined;
-                    let currentParticipants = item.currentParticipants;
 
-                    let sdate = new Date(challenge.chal_sdate);
+                    let sdate = new Date(item.chal_sdate);
                     let now = new Date();
                     now.setHours(0, 0, 0, 0); // 시간 부분을 0으로 설정
                     sdate.setHours(0, 0, 0, 0);
-                    output += '<div class="col-lg-4 col-md-6 col-12 nanum" style="margin-bottom: 30px;">';
+                    output += '<div class="col-lg-4 col-md-6 col-12 nanum each-chal">';
                     output += '<div class="custom-block-wrap">';
                     
                     // 이미지와 참가 인원 오버레이
                     output += '<div class="image-wrapper">';
-                    if (challenge.chal_photo) {
-                        output += '<img src="' + pageContext + '/upload/' + challenge.chal_photo + '" class="custom-block-image img-fluid" >'; //챌린지 썸네일
+                    if (item.chal_photo) {
+                        output += '<img src="' + pageContext + '/upload/' + item.chal_photo + '" class="custom-block-image img-fluid" >'; //챌린지 썸네일
                     } else {
                         output += '<img src="' + pageContext + '/images/챌린지_기본이미지.jpg" class="custom-block-image img-fluid" >'; //챌린지 썸네일 - 기본 이미지
                     }
-                    output += '<div class="participants-overlay"><i class="bi bi-person-fill"></i> ' + currentParticipants + '명</div>';
+                    output += `<div class="fav-overlay">❤️ ${item.fav}</div>`;
+                    output += '<div class="participants-overlay"><i class="bi bi-person-fill"></i> ' + item.attendance + ' 명</div>';
                     output += '</div>';
                     
                     output += '<div class="custom-block">';
                     output += '<div class="custom-block-body">';
                     
-                    output += '<h5 class="mb-3">' + challenge.chal_title + '</h5>';
+                    output += '<h5 class="mb-3">' + item.chal_title + '</h5>';
                     output += '<p>';
                     if (challenge.mem_photo) {
-                        output += '<img src="' + pageContext + '/upload/' + challenge.mem_photo + '" width="20" height="20" class="profile-pic">'; //프사
+                        output += '<img src="' + pageContext + '/upload/' + item.mem_photo + '" width="20" height="20" class="profile-pic">'; //프사
                     } else {
                         output += '<img src="' + pageContext + '/images/basicProfile.png" width="20" height="20" class="profile-pic">'; //프사
                     }
@@ -122,19 +120,19 @@ $(function() {
 
                     output += '<div class="d-flex align-items-center my-2">';
                     output += '<p class="mb-0">';
-                    if (challenge.chal_freq == 7) {
+                    if (item.chal_freq == 7) {
                         output += '<strong>매일</strong>';
-                    } else if (challenge.chal_freq == 1) {
+                    } else if (item.chal_freq == 1) {
                         output += '<strong>주 1일</strong>';
-                    } else if (challenge.chal_freq == 2) {
+                    } else if (item.chal_freq == 2) {
                         output += '<strong>주 2일</strong>';
-                    } else if (challenge.chal_freq == 3) {
+                    } else if (item.chal_freq == 3) {
                         output += '<strong>주 3일</strong>';
-                    } else if (challenge.chal_freq == 4) {
+                    } else if (item.chal_freq == 4) {
                         output += '<strong>주 4일</strong>';
-                    } else if (challenge.chal_freq == 5) {
+                    } else if (item.chal_freq == 5) {
                         output += '<strong>주 5일</strong>';
-                    } else if (challenge.chal_freq == 6) {
+                    } else if (item.chal_freq == 6) {
                         output += '<strong>주 6일</strong>';
                     }
                     output += '</p>';
@@ -150,7 +148,7 @@ $(function() {
                     output += '</div>';
 
                     output += '</div>';
-                    output += '<a href="detail?chal_num=' + challenge.chal_num + '" class="custom-btn btn nanum">참가하기</a>';
+                    output += '<a href="detail?chal_num=' + item.chal_num + '" class="custom-btn btn nanum">참가하기</a>';
                     output += '</div>';
 
                     output += '</div>';
