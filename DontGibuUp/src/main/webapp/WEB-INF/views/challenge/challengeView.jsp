@@ -10,19 +10,12 @@
     request.setAttribute("currentDate", currentDate);
 %>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>챌린지 상세</title>
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/challenge.css">
     <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
     <script>
-        var contextPath = '<%= request.getContextPath() %>';
+    	/* 이것 때문에 좋아요 안될 수 있음 */
+        let contextPath = '${pageContext.request.contextPath}';
     </script>
     <script src="${pageContext.request.contextPath}/js/challenge/challenge.fav.js"></script>
-</head>
-<body>
 <br><br><br><br>
 <div class="challenge-detail nanum">
     <div class="challenge-header">
@@ -59,6 +52,7 @@
             </div>
         </div>
         <c:choose>
+        	<!-- DB에서 현재 날짜를 가져오는게 나았을 듯 -->
             <c:when test="${currentDate > challenge.chal_edate}">
                 <button class="btn-custom" disabled>챌린지 마감</button>
             </c:when>
@@ -166,5 +160,3 @@
     </div>
 </div>
 <br><br><br><br>
-</body>
-</html>

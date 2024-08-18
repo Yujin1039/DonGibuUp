@@ -12,40 +12,20 @@
 <div class="container">
 	<div class="nanum">
 			<div class="align-center">
-
-				<form class="custom-form donate-form" action="#" method="get"
-					role="form">
-					<div class="row" style="padding-left: 250px; padding-right: 250px;">
-						<div class="col-lg-6 col-6 form-check-group form-check-group-donation-frequency">
-						    <div class="form-check form-check-radio">
-						        <input class="form-check-input" type="radio" name="DonationFrequency" id="DonationFrequencyOne">
-						        <label class="form-check-label" for="DonationFrequencyOne" style="cursor: pointer;">
-						            <a href="list">참가 가능한 챌린지</a>
-						        </label>
-						    </div>
-						</div>
-						<div
-							class="col-lg-6 col-6 form-check-group form-check-group-donation-frequency">
-							<div class="form-check form-check-radio">
-								<input class="form-check-input" type="radio"
-									name="DonationFrequency" id="DonationFrequencyMonthly"  checked>
-								<label class="form-check-label" for="DonationFrequencyMonthly" style="cursor: pointer;">
-									지난 챌린지</label>
-							</div>
-						</div>
-					</div>
-					<br>
-
-					<div class="tags-block">
-						<a href="#" class="category-link tags-block-link" data-category="">전체</a>
-						<c:forEach var="cate" items="${categories}" varStatus="status">
-							<a href="#" class="category-link tags-block-link" data-category="${cate.ccate_num}">${cate.ccate_name}</a>
-						</c:forEach>
-					</div>
-				</form>
-			</div>
-			
+				<div class="past-or-present">
+					<a class="p-chal present" href="list">참가 가능 챌린지</a>
+					<a class="p-chal clicked past" href="pastList">지난 챌린지</a>
+				</div>
+				<br>
+				<div class="tags-block">
+					<a href="#" class="category-link tags-block-link" data-category="">전체</a>
+					<c:forEach var="cate" items="${categories}" varStatus="status">
+						<a href="#" class="category-link tags-block-link" data-category="${cate.ccate_num}">${cate.ccate_name}</a>
+					</c:forEach>
+				</div>
+			</div>			
 		</div>
+		<br>
 		<form id="searchTitle">
 			<div class="nanum" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
 			    <div style="flex: 1; display: flex; gap: 10px; align-items: center;">
