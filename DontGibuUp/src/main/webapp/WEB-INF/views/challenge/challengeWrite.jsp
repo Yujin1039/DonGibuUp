@@ -12,11 +12,26 @@
                 <td><form:label path="chal_public">챌린지 유형<span class="mandatory">*</span></form:label></td>
                 <td>
                     <form:radiobutton path="chal_public" value="0" id="chal_public_0" class="custom-radio"/>
-		            <label for="chal_public_0" class="custom-radio-label">공개</label>
+		            <label for="chal_public_0" class="custom-radio-label">단체</label>
 		            <form:radiobutton path="chal_public" value="1" id="chal_public_1" class="custom-radio"/>
-		            <label for="chal_public_1" class="custom-radio-label">비공개</label>
+		            <label for="chal_public_1" class="custom-radio-label">개인</label>
                     <br>
                     <form:errors path="chal_public" cssClass="error-color"/>
+                    <script type="text/javascript">
+                    	let p0 = document.getElementById('chal_public_0');
+                    	let p1 = document.getElementById('chal_public_1');
+                    	
+                    	p1.onclick = function(){
+                    		let max = document.getElementById('chal_max');
+                    		max.value = 1;
+                    		max.setAttribute('disabled',true);                   	                   		
+                    	};
+                    	p0.onclick = function(){
+                    		let max = document.getElementById('chal_max');
+                    		max.value = '';
+                    		max.removeAttribute('disabled');                   	                   		
+                    	};
+                    </script>
                 </td>
             </tr>
             <tr>
@@ -62,7 +77,7 @@
                 <td><form:label path="chal_sdate">챌린지 시작일<span class="mandatory">*</span></form:label></td>
                 <td>
                     <form:input type="date" path="chal_sdate" id="chal_sdate" class="input-date-custom"/>
-                    	<script type="text/javascript">
+                    <script type="text/javascript">
 						let today = new Date();
 						today.setDate(today.getDate() + 1);
 						
@@ -121,7 +136,7 @@
             <tr>
                 <td><form:label path="chal_fee">참가비<span class="mandatory">*</span></form:label></td>
                 <td>
-                    <form:input path="chal_fee" placeholder="1000원 단위로 입력" class="input-text-custom"/>원
+                    <form:input path="chal_fee" placeholder="1000원 이상 입력" class="input-text-custom"/>원
                     <br>
                     <form:errors path="chal_fee" cssClass="error-color"/>
                 </td>
@@ -137,7 +152,7 @@
             <tr>
                 <td><form:label path="upload">대표사진</form:label></td>
                 <td>
-                    <input type="file" name="upload" id="upload" onchange="previewImage(event)" class="input-file-custom"/>
+                    <input type="file" name="upload" id="upload" onchange="previewImage(event)"/>
                     <div class="image-preview">
                         <img id="imagePreview" src="#" alt="Image Preview" style="display: none;"/>
                     </div>
@@ -153,6 +168,9 @@
 </div>
 <br><br><br><br>
 <script>
+	const radios = document.querySelectorAll('.custom-radio');
+	radios.forEach(radio => radio.checked = false);
+	
     function previewImage(event) {
         var reader = new FileReader();
         reader.onload = function(){

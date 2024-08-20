@@ -115,30 +115,6 @@ public class ChallengeAjaxController {
 		mapJson.put("count", count);
 		mapJson.put("list", list);
 
-		// 각 챌린지에 대해 추가 정보를 조회하여 mapJson에 추가
-		/*
-		List<Map<String, Object>> challengeDetailsList = new ArrayList<>();
-		for (ChallengeVO challenge : list) {
-			Map<String, Object> challengeDetails = new HashMap<>();
-			challengeDetails.put("challenge", challenge);
-
-			boolean isJoined = false;
-			if (member != null) {
-				Map<String, Object> joinMap = new HashMap<>();
-				joinMap.put("chal_num", challenge.getChal_num());
-				joinMap.put("mem_num", member.getMem_num());
-				List<ChallengeJoinVO> joinList = challengeService.selectChallengeJoinList(joinMap);
-				isJoined = joinList.stream().anyMatch(join -> join.getChal_num() == challenge.getChal_num());
-			}
-			challengeDetails.put("isJoined", isJoined);
-
-			int currentParticipants = challengeService.countCurrentParticipants(challenge.getChal_num());
-			challengeDetails.put("currentParticipants", currentParticipants);
-
-			challengeDetailsList.add(challengeDetails);
-		}
-		mapJson.put("challengeDetailsList", challengeDetailsList);
-		*/
 		return mapJson;
 	}
 
