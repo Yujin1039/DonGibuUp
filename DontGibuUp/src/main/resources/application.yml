@@ -79,5 +79,8 @@ naver:
 iamport:
   apiKey: "2501776226527075"
   secretKey: "qpZRCTf52Ldmm3eOgJwXu8lVk80JNJLszHOVhk9onjhCwSaUxMh2neAOtQmZcniVoveOdlaHBMtYX5Er"
+  chal_apiKey: ${chal_apikey}
+  chal_secretKey: ${chal_secretkey}
+  
 
 
