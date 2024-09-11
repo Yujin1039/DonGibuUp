@@ -118,7 +118,7 @@ $(function() {
 
 					output += '<div class="d-flex align-items-center my-2">';
 					output += '<p class="mb-0">';
-					if (item.chal_freq == 0) {
+					if (item.chal_freq == 7) {
 						output += '<strong>매일</strong>';
 					} else if (item.chal_freq == 1) {
 						output += '<strong>주 1일</strong>';

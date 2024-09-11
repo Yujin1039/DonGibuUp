@@ -33,6 +33,8 @@
 }
 .each-chal{
 	margin-bottom: 30px;
+	margin-left: 15px;
+	margin-right: 15px;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
 	border-radius: 1.2rem;
 }

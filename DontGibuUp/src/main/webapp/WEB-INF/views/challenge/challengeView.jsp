@@ -51,8 +51,8 @@
                 ${challenge.mem_nick}
             </div>
         </div>
-        <c:choose>
         	<!-- DB에서 현재 날짜를 가져오는게 나았을 듯 -->
+        <c:choose>
             <c:when test="${currentDate > challenge.chal_edate}">
                 <button class="btn-custom" disabled>챌린지 마감</button>
             </c:when>

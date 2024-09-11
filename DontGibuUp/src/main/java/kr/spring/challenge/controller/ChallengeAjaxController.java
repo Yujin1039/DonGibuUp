@@ -436,8 +436,6 @@ public class ChallengeAjaxController {
 			//결제 취소 요청하기
 			CancelData cancelData = new CancelData(imp_uid, true);
 			impClient.cancelPaymentByImpUid(cancelData);
-			//대표 사진 제거
-			FileUtil.removeFile(request, challengeVO.getChal_photo());
 		}
 		log.debug("payment"+payment);
 		return payment;

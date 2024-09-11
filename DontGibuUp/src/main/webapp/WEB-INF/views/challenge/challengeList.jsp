@@ -78,6 +78,6 @@
 		</form>
 		<br>
 		<div id="output" class="row"></div>
-</div>
+	</div>
 
 </section>

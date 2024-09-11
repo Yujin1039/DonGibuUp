@@ -41,7 +41,7 @@
         <input type="file" name="upload" class="file-input" id="fileUpload" accept="image/*">			
 		<input type="hidden" name="chal_num" id="chal_num" value="${chal_num}">	
 	  	<textarea rows="5" cols="30" name="chat_content" id="chat_content"></textarea>  
-		<input type="submit" value="→" id="chal_submit">
+		<input type="submit" value="⩥" id="chal_submit">
 	</form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>

@@ -91,11 +91,11 @@ $(function() {
                     let now = new Date();
                     now.setHours(0, 0, 0, 0); // 시간 부분을 0으로 설정
                     sdate.setHours(0, 0, 0, 0);
-                    output += '<div class="col-lg-4 col-md-6 col-12 nanum each-chal">';
-                    output += '<div class="custom-block-wrap">';
-                    
+                    output += `<div class="col-lg-4 col-md-6 col-12 nanum">
+                    		       <div class="each-chal">
+								       <div class="custom-block-wrap">
+							  		       <div class="image-wrapper">`;                                        
                     // 이미지와 참가 인원 오버레이
-                    output += '<div class="image-wrapper">';
                     if (item.chal_photo) {
                         output += '<img src="' + pageContext + '/upload/' + item.chal_photo + '" class="custom-block-image img-fluid" >'; //챌린지 썸네일
                     } else {
@@ -110,12 +110,12 @@ $(function() {
                     
                     output += '<h5 class="mb-3">' + item.chal_title + '</h5>';
                     output += '<p>';
-                    if (challenge.mem_photo) {
+                    if (item.mem_photo) {
                         output += '<img src="' + pageContext + '/upload/' + item.mem_photo + '" width="20" height="20" class="profile-pic">'; //프사
                     } else {
                         output += '<img src="' + pageContext + '/images/basicProfile.png" width="20" height="20" class="profile-pic">'; //프사
                     }
-                    output += ' <span>' + challenge.mem_nick + '</span>';
+                    output += ' <span>' + item.mem_nick + '</span>';
                     output += '</p>';
 
                     output += '<div class="d-flex align-items-center my-2">';
@@ -152,7 +152,8 @@ $(function() {
                     output += '</div>';
 
                     output += '</div>';
-                    output += '</div>';
+					output += '</div>';
+					output += '</div>';
                 });
                 $('#output').append(output);
 
