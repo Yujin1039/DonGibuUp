@@ -83,9 +83,7 @@ $(function() {
 			success: function(param) {
 				if (param.result == 'logout') {
 					alert('로그인 후 채팅 가능합니다.');
-					message_socket.close();
 					window.close();
-					window.location.href = `${contextPath}/member/login`;
 				} else if (param.result = 'success') {
 					//폼 초기화
 					$('#chat_content').val('');
@@ -111,7 +109,7 @@ $(function() {
 	function readChat() {
 		$.ajax({
 			url: 'chalReadChat',
-			type: 'get',
+			type: 'post',
 			data: { chal_num: $('#chal_num').val() },
 			dataType: 'json',
 			success: function(param) {

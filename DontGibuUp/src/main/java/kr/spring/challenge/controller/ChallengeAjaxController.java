@@ -521,7 +521,7 @@ public class ChallengeAjaxController {
 	/*==========================
 	 *  챌린지 단체 채팅
 	 *==========================*/
-	//쿼리스트링 제거
+	//chal_num 데이터 세션에 저장
 	@PostMapping("/challenge/join/joinChal_chat")
 	@ResponseBody
 	public Map<String,Object> joinChallengeChat(Long chal_num,HttpSession session) {	
@@ -530,8 +530,8 @@ public class ChallengeAjaxController {
 		if(user == null) {
 			mapJson.put("result","logout");
 		}else {
-			session.setAttribute("chal_num", chal_num);
 			mapJson.put("result", "success");
+			session.setAttribute("chal_num", chal_num);
 		}			
 		return mapJson;
 	}
@@ -562,7 +562,7 @@ public class ChallengeAjaxController {
 	}
 
 	//채팅 메시지 읽어오기
-	@GetMapping("/challenge/join/chalReadChat")
+	@PostMapping("/challenge/join/chalReadChat")
 	@ResponseBody
 	public Map<String,Object> readChallengeChat(long chal_num,HttpSession session){
 		Map<String,Object> mapJson = new HashMap<>();

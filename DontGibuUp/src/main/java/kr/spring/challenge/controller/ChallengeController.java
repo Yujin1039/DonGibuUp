@@ -337,15 +337,6 @@ public class ChallengeController {
 	}
 
 	/*
-	 * //챌린지 참가 상세
-	 * 
-	 * @GetMapping("/challenge/joinDetail") public ModelAndView
-	 * joinDetail(@RequestParam("chal_joi_num") Long chal_joi_num) { ChallengeJoinVO
-	 * challengeJoin = challengeService.selectChallengeJoin(chal_joi_num); return
-	 * new ModelAndView("challengeJoinView", "challengeJoin", challengeJoin); }
-	 */
-
-	/*
 	 * ========================== 챌린지 단체 채팅 ==========================
 	 */
 	// 챌린지 채팅방 입장
@@ -441,12 +432,23 @@ public class ChallengeController {
 
 		return "common/resultAlert";
 	}
-
+	
 	// 챌린지 인증 목록
 	@GetMapping("/challenge/verify/list")
-	public ModelAndView verifyList(long chal_joi_num, long chal_num,
+	public ModelAndView verifyList(long chal_joi_num, long chal_num,HttpSession session,
 			@RequestParam(value = "status", defaultValue = "pre") String status,
 			@RequestParam(defaultValue = "1") int pageNum) {
+		//접근 권한 확인하기
+		ChallengeJoinVO challengeJoin = challengeService.selectChallengeJoin(chal_joi_num);
+		MemberVO user = (MemberVO) session.getAttribute("user");
+		Long mem_joi_num = challengeService.selectLeaderJoiNum(chal_num);
+		if(challengeJoin == null || challengeJoin.getMem_num() != user.getMem_num() || mem_joi_num == null) {
+			ModelAndView error = new ModelAndView("common/resultAlert");
+			error.addObject("message", "접근 권한이 없습니다.");
+			error.addObject("url", "../join/list?status=on");
+			return error;
+		}
+				
 		Map<String, Object> map = new HashMap<>();
 		map.put("chal_joi_num", chal_joi_num);
 
@@ -470,7 +472,6 @@ public class ChallengeController {
 		mav.addObject("today", today.toString());
 
 		// 챌린지 정보 가져오기
-		ChallengeJoinVO challengeJoin = challengeService.selectChallengeJoin(chal_joi_num);
 		ChallengeVO challenge = challengeService.selectChallenge(challengeJoin.getChal_num());
 		int chalFreq = challengeJoin.getChal_freq();
 		String chal_sdate = challengeJoin.getChal_sdate();
@@ -536,8 +537,7 @@ public class ChallengeController {
 		//페이징 처리를 위한 인증 개수 처리
 		mav.addObject("count", count);
 
-		// 회원이 챌린지 리더인지 확인
-		long mem_joi_num = challengeService.selectLeaderJoiNum(chal_num);
+		// 회원이 챌린지 리더인지 확인			
 		if (mem_joi_num == chal_joi_num) {
 			mav.addObject("isLeader", true);
 		} else {
@@ -546,17 +546,6 @@ public class ChallengeController {
 
 		return mav;
 	}
-
-	// 챌린지 인증 상세
-	/*
-	 * @GetMapping("/challenge/verify/detail")
-	 * 
-	 * @ResponseBody public String getVerify(@RequestParam("chal_ver_num") long
-	 * chal_ver_num) { ChallengeVerifyVO challengeVerify =
-	 * challengeService.selectChallengeVerify(chal_ver_num);
-	 * 
-	 * return challengeVerify.getChal_content(); }
-	 */
 
 	// 챌린지 인증 수정
 	@PostMapping("/challenge/verify/update")

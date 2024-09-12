@@ -85,13 +85,11 @@
 		(SELECT 
 			COUNT(*)
          FROM chal_join cj
-         WHERE cj.chal_num = c.chal_num
+         WHERE cj.chal_num = c.chal_num AND chal_joi_status = 0 
          GROUP BY cj.chal_num) attendance
 		FROM challenge c
-		JOIN member m ON
-		c.mem_num=m.mem_num
-		LEFT OUTER JOIN member_detail md ON
-		c.mem_num=md.mem_num
+		JOIN member m ON c.mem_num=m.mem_num
+		LEFT OUTER JOIN member_detail md ON c.mem_num=md.mem_num
 		<include refid="challengeSearch"></include>
 		<include refid="challengeSort"></include>
 		)a
@@ -325,7 +323,7 @@
 			(SELECT 
 				TO_DATE(chal_joi_date)
 			FROM chal_join
-			WHERE chal_num=#{chal_num}
+			WHERE chal_num=#{chal_num} AND chal_joi_status = 0 
 			AND mem_num=#{mem_num})
 		</if>		
 		ORDER BY chat_date ASC

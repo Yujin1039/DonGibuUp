@@ -1,30 +1,3 @@
-/*$(document).on('click','.chal_join',function(e){
-	e.preventDefault();
-	let chal_num = $(this).data('chal-num');
-	let chal_joi_num = $(this).data('chal-joi-num');
-	let status = $(this).data('status');
-	$.ajax({
-		url:'list',
-		type:'post',
-		data:JSON.stringify({
-			chal_num:chal_num,
-			chal_joi_num:chal_joi_num,
-			status:status
-		}),
-		contentType:'application/json',
-		success:function(rsp){
-			if(rsp.result == 'logout'){
-				window.location.replace(contextPath+'/member/login');
-			}else if(rsp.result == 'success'){
-				window.location.href='../verify/list';
-			}
-		},
-		error:function(){
-			alert('네트워크 오류');
-		}
-	});
-});*/
-
 let pageNum;
 
 if (pageNum == null) {
@@ -40,7 +13,7 @@ $(document).on('click', '.chal_talk', function(e) {
 		data: { chal_num: chal_num },
 		success: function(rsp) {
 			if (rsp.result == 'logout') {
-				window.location.replace(contextPath + '/member/login');
+				alert('로그인 후 채팅 가능합니다.');				
 			} else if (rsp.result == 'success') {
 				window.open('chal_chatDetail', 'Popup', 'width=700,height=800');
 			}
