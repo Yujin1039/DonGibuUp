@@ -40,6 +40,7 @@ public class PurchaseController {
 
     @Value("${iamport.secretKey}")
     private String secretKey;
+    
     @Autowired
 	private NotifyService notifyService;
     @Autowired

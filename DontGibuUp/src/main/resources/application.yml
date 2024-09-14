@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: application-secret.yml
+  
   profiles:
     active: local #local,dev,real
     
@@ -10,8 +13,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521:xe
-    username: yujin02
-    password: 1234
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
     hikari:
       connection-timeout: 30000 #클라이언트가 pool에 connection을 요청하는데 기다리는 최대시간을 설정 30초
       maximum-pool-size: 10 #최대 커넥션 개수 설정
@@ -67,20 +70,22 @@ server:
     max-http-form-post-size: 200MB #톰캣에서 허용하는 파일 업로드 사이즈
 
 kakao:
-  client_id: 361a53f841ae7d3b7fc4a74f0535dba2
-  redirect_uri: http://localhost:8000/member/callback/kakao
-  client_secret: PYllM1U05uZRCeeV64RWvPHDAiEPmkbd
+  client_id: ${kakao.client_id}
+  redirect_uri: ${kakao.redirect_url}
+  client_secret: ${kakao.client_secret}
 
 naver:
-  client_id: inEolviFM4LB9sPu34jX
-  redirect_uri: http://localhost:8000/member/callback/naver
-  client_secret: zIDSLvMlCb
+  client_id: ${naver.client_id}
+  redirect_uri: ${naver.redirect_url}
+  client_secret: ${naver.client_secret}
   
 iamport:
-  apiKey: "2501776226527075"
-  secretKey: "qpZRCTf52Ldmm3eOgJwXu8lVk80JNJLszHOVhk9onjhCwSaUxMh2neAOtQmZcniVoveOdlaHBMtYX5Er"
-  chal_apiKey: ${chal_apikey}
-  chal_secretKey: ${chal_secretkey}
+  apiKey: ${iamport.apiKey}
+  secretKey: ${iamport.secretKey}
+  chal_apiKey: ${iamport.chal_apiKey}
+  chal_secretKey: ${iamport.chal_secretKey}
+  dbox_apiKey: ${iamport.dbox_apiKey}
+  dbox_secretKey: ${iamport.dbox_secretKey}
   
 
 
