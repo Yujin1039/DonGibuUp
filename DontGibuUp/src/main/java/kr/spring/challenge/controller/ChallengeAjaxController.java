@@ -290,21 +290,8 @@ public class ChallengeAjaxController {
 	/*==========================
 	 *  챌린지 결제
 	 *==========================*/
-	//IamportClient 초기화 하기
-	private IamportClient impClient; 
-	
-	@Value("${iamport.chal_apiKey}")
-	private String apiKey;
-	
-	@Value("${iamport.chal_secretKey}")
-	private String secretKey;
-
-	@PostConstruct
-	public void initImp() {
-		this.impClient = new IamportClient(apiKey,secretKey);
-	}
-
-	// 결제 정보 검증하기
+	// 결제 정보 검증하기(참가자)
+	/*
 	@PostMapping("/challenge/paymentVerifyWrite/{imp_uid}")
 	@ResponseBody
 	public IamportResponse<Payment> validateIamportWrite(@PathVariable String imp_uid, 
@@ -340,7 +327,7 @@ public class ChallengeAjaxController {
 		return payment;
 	}
 
-	//챌린지 참가 및 결제 정보 저장
+	//챌린지 참가 및 결제 정보 저장(참가자)
 	@PostMapping("/challenge/payAndEnrollWrite")
 	@ResponseBody
 	public Map<String, String> saveChallengeInfoWrite(@RequestBody Map<String, Object> data, HttpSession session, HttpServletRequest request)
@@ -405,57 +392,15 @@ public class ChallengeAjaxController {
 
 		return mapJson;
 	}
-
-	//결제 정보 검증 (리더)
-	@PostMapping("/challenge/paymentVerify/{imp_uid}")
-	@ResponseBody
-	public IamportResponse<Payment> validateIamport(@PathVariable String imp_uid,HttpSession session,
-			HttpServletRequest request) throws IamportResponseException, IOException{        
-		IamportResponse<Payment> payment = impClient.paymentByImpUid(imp_uid);
-
-		//로그인 여부 확인하기
-		MemberVO member = (MemberVO) session.getAttribute("user");
-
-		//세션에 저장된 결제 금액 가져오기
-		ChallengeVO challengeVO = (ChallengeVO) session.getAttribute("challengeVO");
-		int expectedAmount = challengeVO.getChal_fee();
-
-		//실 결제 금액
-		int paidAmount = payment.getResponse().getAmount().intValue();
-		//사용 포인트
-		String usedPointsJSON = payment.getResponse().getCustomData();
-		int usedPoints = 0;
-		
-		JSONObject usedPointsObject = new JSONObject(usedPointsJSON);
-		usedPoints = usedPointsObject.getInt("usedPoints");
-		
-		log.debug("usedPoints >> "+usedPoints);
-
-		//예정 결제 금액과 실 결제 금액 비교하기
-		if(expectedAmount-usedPoints != paidAmount || member == null) {
-			//결제 취소 요청하기
-			CancelData cancelData = new CancelData(imp_uid, true);
-			impClient.cancelPaymentByImpUid(cancelData);
-		}
-		log.debug("payment"+payment);
-		return payment;
-	}
-
-	//챌린지 개설, 참가, 리더 결제 정보 저장
+	*/
+	
+	//챌린지 결제 검증 및 저장(리더)
 	@PostMapping("/challenge/payAndEnroll")
 	@ResponseBody
 	public Map<String,String> saveChallengeInfo(@RequestBody Map<String, Object> data, 
-			HttpSession session, HttpServletRequest request) throws IllegalStateException, IOException{
-		int chalPayPrice = (Integer) data.get("chal_pay_price");					
-		int chalPoint = (Integer) data.get("chal_point");
-		int chalPayStatus = (Integer) data.get("chal_pay_status");
-		int dcateNum = (Integer) data.get("dcate_num");	
-		
-		log.debug("chalPayPrice : "+chalPayPrice);
-		log.debug("chalPoint : "+chalPoint);
-		log.debug("chalPayStatus : "+chalPayStatus);
-		log.debug("dcateNum : "+dcateNum);
-
+			HttpSession session, HttpServletRequest request) throws IllegalStateException, IOException, IamportResponseException{
+		//log.debug("imp_uid = {}",imp_uid);
+		log.debug("결제관련 정보 = {}",data);
 		Map<String,String> mapJson = new HashMap<>();
 
 		//세션 데이터 가져오기
@@ -464,45 +409,55 @@ public class ChallengeAjaxController {
 
 		if(member == null) {
 			mapJson.put("result", "logout");
-		}else {			
-			//챌린지 참가 정보 저장
-			ChallengeJoinVO challengeJoinVO = new ChallengeJoinVO();
-			challengeJoinVO.setMem_num(member.getMem_num());
-			challengeJoinVO.setDcate_num(dcateNum);
-			challengeJoinVO.setChal_joi_ip(request.getRemoteAddr());
-
-			//챌린지 결제 정보 저장
-			ChallengePaymentVO challengePaymentVO = new ChallengePaymentVO();
-			challengePaymentVO.setMem_num(member.getMem_num());
-			challengePaymentVO.setChal_pay_price(chalPayPrice);
-			challengePaymentVO.setChal_point(chalPoint);
-			if(chalPayPrice > 0) {
-				String odImpUid = (String) data.get("od_imp_uid");
-				challengePaymentVO.setOd_imp_uid(odImpUid);
-				log.debug("odImpUid : "+odImpUid);
-			}
-			
-			//챌린지 시작 채팅 메시지 설정
-			ChallengeChatVO chatVO = new ChallengeChatVO();
-			chatVO.setChat_content("챌린지가 시작되었습니다! @{common}");
-			chatVO.setMem_num(member.getMem_num());
-			
-			challengeService.insertChallenge(challenge,challengeJoinVO,challengePaymentVO,chatVO);
-
-			//포인트 사용시 반영
-			if(chalPoint > 0) {
-				//세션 포인트 업데이트
-				member.setMem_point(member.getMem_point()-chalPoint);
-			}
-			
-			String sdate = challenge.getChal_sdate();
-
-			session.removeAttribute("challengeVO");
-
-			mapJson.put("result", "success");
-			mapJson.put("sdate", sdate);
+		}else {	
+			//결제 금액 사전 검증
+			int chalPayPrice = (Integer) data.get("chal_pay_price");					
+			int chalPoint = (Integer) data.get("chal_point");
+			if(chalPayPrice != challenge.getChal_fee() - chalPoint) {
+				mapJson.put("result", "forgery");
+			}else {				
+				//챌린지 참가 정보
+				int dcateNum = (Integer) data.get("dcate_num");	
+				ChallengeJoinVO challengeJoinVO = new ChallengeJoinVO();
+				challengeJoinVO.setMem_num(member.getMem_num());
+				challengeJoinVO.setDcate_num(dcateNum);
+				challengeJoinVO.setChal_joi_ip(request.getRemoteAddr());
+				log.debug("challengeJoinVO = {}",challengeJoinVO);
+				
+				//챌린지 결제 정보
+				ChallengePaymentVO challengePaymentVO = new ChallengePaymentVO();
+				challengePaymentVO.setMem_num(member.getMem_num());
+				challengePaymentVO.setChal_pay_price(chalPayPrice);
+				challengePaymentVO.setChal_point(chalPoint);
+				if(chalPayPrice > 0) {
+					String imp_uid = (String) data.get("imp_uid");
+					challengePaymentVO.setOd_imp_uid(imp_uid);
+				}
+				log.debug("challengePaymentVO = {}",challengePaymentVO);
+				
+				//챌린지 시작 채팅 메시지 설정
+				ChallengeChatVO chatVO = new ChallengeChatVO();
+				chatVO.setChat_content("챌린지가 시작되었습니다! @{common}");
+				chatVO.setMem_num(member.getMem_num());
+				
+				//챌린지 결제, 개설, 참가, 채팅방 생성
+				String result = challengeService.insertChallenge(challenge,challengeJoinVO,challengePaymentVO,chatVO);
+				
+				if(result.equals("paid")) {
+					//포인트 사용시 반영
+					if(chalPoint > 0) {
+						//세션 포인트 업데이트
+						member.setMem_point(member.getMem_point()-chalPoint);
+					}
+					
+					String sdate = challenge.getChal_sdate();
+					
+					session.removeAttribute("challengeVO");					
+					mapJson.put("sdate", sdate);				
+				}				
+				mapJson.put("result", result);
+			}			
 		}
-
 		return mapJson;
 	}
 

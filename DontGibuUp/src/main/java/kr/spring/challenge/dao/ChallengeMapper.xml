@@ -249,13 +249,13 @@
 		<if test="od_imp_uid != null">
 			od_imp_uid,
 		</if>
-		chal_pay_price, chal_point, chal_pay_status)
+		chal_pay_price, chal_point)
 		VALUES
 		(chal_payment_seq.nextval, #{chal_joi_num}, #{mem_num},
 		<if test="od_imp_uid != null">
 			#{od_imp_uid},
 		</if>
-		#{chal_pay_price}, #{chal_point},#{chal_pay_status})
+		#{chal_pay_price}, #{chal_point})
 	</insert>
 
 	<!-- 챌린지 ID로 챌린지 참가 데이터 삭제 -->
@@ -347,17 +347,17 @@
 	<select id="selectChallengeVerifyList" parameterType="map"
 		resultType="challengeVerifyVO">
 		SELECT * FROM(
-		SELECT a.*,rownum rnum FROM(
-		SELECT
-		cv.*,
-		(SELECT
-		COUNT(*)
-		FROM chal_verify_rpt cvr
-		WHERE cvr.reported_joi_num = cv.chal_joi_num) reported_num
-		FROM CHAL_VERIFY cv
-		WHERE chal_joi_num = #{chal_joi_num}
-		ORDER BY chal_reg_date DESC
-		)a
+			SELECT a.*,rownum rnum FROM(
+				SELECT
+					cv.*,
+					(SELECT
+						COUNT(*)
+					FROM chal_verify_rpt cvr
+					WHERE cvr.reported_joi_num = cv.chal_joi_num) reported_num
+				FROM CHAL_VERIFY cv
+			WHERE chal_joi_num = #{chal_joi_num}
+			ORDER BY chal_reg_date DESC
+			)a
 		)
 		<if test="start != null and end != null">
 		<![CDATA[

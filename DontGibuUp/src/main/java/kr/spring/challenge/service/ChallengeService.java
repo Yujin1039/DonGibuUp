@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 
 import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.challenge.vo.ChallengeFavVO;
@@ -19,7 +21,7 @@ import kr.spring.challenge.vo.ChallengeVerifyVO;
 public interface ChallengeService {
 	
 	//*챌린지 개설*//
-	public void insertChallenge(ChallengeVO chalVO,ChallengeJoinVO joinVO,ChallengePaymentVO payVO,ChallengeChatVO chatVO);
+	public String insertChallenge(ChallengeVO chalVO,ChallengeJoinVO joinVO,ChallengePaymentVO payVO,ChallengeChatVO chatVO) throws IamportResponseException, IOException;
 	public List<ChallengeVO> selectList(Map<String,Object> map);
 	public Integer selectRowCount(Map<String,Object> map);
 	public ChallengeVO selectChallenge(Long chal_num);
@@ -49,6 +51,9 @@ public interface ChallengeService {
 	public ChallengeReviewVO selectChallengeReviewByMemberAndChallenge(Map<String, Object> map);
 	
 	//*챌린지 결제*//
+	//결제하기
+	public IamportResponse<Payment> payChallenge(ChallengePaymentVO payVO, Integer chal_fee) throws IamportResponseException, IOException;
+	//결제 정보 추가
     public void insertChallengePayment(ChallengePaymentVO chalPayVO);
     //단건 결제 내역 불러오기
     public ChallengePaymentVO selectChallengePayment(Long chal_joi_num);

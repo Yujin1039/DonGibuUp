@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 
 import kr.spring.challenge.dao.ChallengeMapper;
 import kr.spring.challenge.vo.ChallengeChatVO;
@@ -38,7 +41,6 @@ import kr.spring.notify.service.NotifyService;
 import kr.spring.notify.vo.NotifyVO;
 import kr.spring.point.service.PointService;
 import kr.spring.point.vo.PointVO;
-import kr.spring.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -64,7 +66,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 	@Value("${iamport.chal_apiKey}")
 	private String apiKey;
-	
+
 	@Value("${iamport.chal_secretKey}")
 	private String secretKey;
 
@@ -75,21 +77,30 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 	//*챌린지 개설*//
 	@Override
-	public void insertChallenge(ChallengeVO chalVO,ChallengeJoinVO joinVO,ChallengePaymentVO payVO,ChallengeChatVO chatVO) {
-		//1. 챌린지 기본 정보 삽입
+	public String insertChallenge(ChallengeVO chalVO,ChallengeJoinVO joinVO,ChallengePaymentVO payVO,ChallengeChatVO chatVO) throws IamportResponseException, IOException {
+		//챌린지 결제
+		if(payVO.getChal_pay_price() > 0) {
+			IamportResponse<Payment> payment = payChallenge(payVO,chalVO.getChal_fee());
+			log.info("결제 결과 = {}",payment);
+			if(payment.getResponse().getStatus().equals("failed")) {
+				return "failed";			
+			}
+		}
+
+		//챌린지 기본 정보 삽입
 		chalVO.setChal_num(challengeMapper.selectChal_num());
 		challengeMapper.insertChallenge(chalVO);
 
-		//2. 챌린지 참가 정보 삽입
+		//챌린지 참가 정보 삽입
 		joinVO.setChal_num(chalVO.getChal_num());
 		joinVO.setChal_joi_num(challengeMapper.selectChal_joi_num());
 		challengeMapper.insertChallengeJoin(joinVO);
 
-		//3. 챌린지 결제 정보 삽입
+		//챌린지 결제 정보 삽입
 		payVO.setChal_joi_num(joinVO.getChal_joi_num());
 		challengeMapper.insertChallengePayment(payVO);
 
-		//4. 결제시 포인트 변동사항 기록 
+		//결제시 포인트 변동사항 기록 
 		if(payVO.getChal_point() > 0) {
 			//포인트 로그 작성
 			PointVO pointVO = new PointVO(20,-payVO.getChal_point(),payVO.getMem_num());
@@ -99,7 +110,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 			memberService.updateMemPoint(pointVO);
 		}
 
-		//5. 챌린지 채팅방 정보 삽입 (공개 챌린지일 경우만)
+		//챌린지 채팅방 정보 삽입 (공개 챌린지일 경우만)
 		if(chalVO.getChal_public() == 0) {
 			chatVO.setChal_num(chalVO.getChal_num());	
 			long chat_id = challengeMapper.selectChat_id();
@@ -108,7 +119,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 			challengeMapper.insertChallengeChat(chatVO);
 		}
 
-		//6. 챌린지 개설 알림
+		//챌린지 개설 알림
 		NotifyVO notifyVO = new NotifyVO();
 		notifyVO.setMem_num(chalVO.getMem_num()); //챌린지 개설자에게 알림
 		notifyVO.setNotify_type(3); //알림 타입: 챌린지 개설 알림
@@ -120,6 +131,8 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 		//알림 서비스 호출
 		notifyService.insertNotifyLog(notifyVO, dynamicValues);
+		
+		return "paid";
 	}	
 
 	@Override
@@ -232,6 +245,29 @@ public class ChallengeServiceImpl implements ChallengeService{
 	}
 
 	//*챌린지 결제*//
+	// 결제 및 사후 검증
+	@Override
+	public IamportResponse<Payment> payChallenge(ChallengePaymentVO payVO,Integer chal_fee) throws IamportResponseException, IOException {
+		//결제 시도
+		IamportResponse<Payment> payment = impClient.paymentByImpUid(payVO.getOd_imp_uid());
+		log.debug("결제사후 결과 = {}",payment);
+		//실 결제 금액
+		int paidAmount = payment.getResponse().getAmount().intValue();
+		//사용 포인트
+		String usedPointsJSON = payment.getResponse().getCustomData();
+		JSONObject usedPointsObject = new JSONObject(usedPointsJSON);
+		int usedPoints = usedPointsObject.getInt("usedPoints");
+
+		//예정 결제 금액과 실 결제 금액 비교하기
+		if(chal_fee-usedPoints != paidAmount) {
+			//결제 취소 요청하기
+			CancelData cancelData = new CancelData(payVO.getOd_imp_uid(), true);
+			impClient.cancelPaymentByImpUid(cancelData);
+		}
+		return payment;
+	}
+
+	// 결제 정보 DB 반영
 	@Override
 	public void insertChallengePayment(ChallengePaymentVO chalPayVO) {
 		challengeMapper.insertChallengePayment(chalPayVO);
@@ -472,7 +508,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 		//챌린지 톡방 환영 메시지 삭제
 		challengeMapper.deleteChallengeChat(chal_num);
-		
+
 		//챌린지 좋아요 삭제
 		challengeMapper.deleteAllFav(chal_num);
 
@@ -853,12 +889,12 @@ public class ChallengeServiceImpl implements ChallengeService{
 		}else if(chal_phase == 1){//진행 중인 챌린지 중단
 			//챌린지 채팅방 삭제
 			deleteChallengeChat(chal_num);
-			
+
 			//챌린지 인증 신고 & 기록 삭제
 			Map<String, Object> rptMap = new HashMap<>();
 			rptMap.put("chal_num", chal_num);
 			List<ChallengeJoinVO> joinList = selectJoinMemberList(rptMap);
-			
+
 			for(ChallengeJoinVO join : joinList) {
 				challengeMapper.deleteVerifyReport(join.getMem_num()); 	
 				challengeMapper.deleteChallengeVerifyByChalJoiNum(join.getChal_joi_num());
@@ -866,7 +902,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 		}
 		//챌린지 좋아요 삭제
 		challengeMapper.deleteAllFav(chal_num);
-		
+
 		//챌린지 상태 - 취소
 		challengeMapper.updateChallengeStatus(chal_num);
 	}	
