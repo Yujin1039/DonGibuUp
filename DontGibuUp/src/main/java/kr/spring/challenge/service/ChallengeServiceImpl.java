@@ -1,7 +1,6 @@
 package kr.spring.challenge.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.siot.IamportRestClient.IamportClient;
-import com.siot.IamportRestClient.exception.IamportResponseException;
-import com.siot.IamportRestClient.request.CancelData;
 
 import kr.spring.challenge.dao.ChallengeMapper;
 import kr.spring.challenge.vo.ChallengeChatVO;
@@ -58,20 +55,6 @@ public class ChallengeServiceImpl implements ChallengeService{
 	NotifyService notifyService;
 	@Autowired
 	private ServletContext servletContext;
-
-	//IamportClient 초기화 하기
-	private IamportClient impClient; 
-
-	@Value("${iamport.chal_apiKey}")
-	private String apiKey;
-	
-	@Value("${iamport.chal_secretKey}")
-	private String secretKey;
-
-	@PostConstruct
-	public void initImp() {
-		this.impClient = new IamportClient(apiKey,secretKey);
-	}
 
 	//*챌린지 개설*//
 	@Override
