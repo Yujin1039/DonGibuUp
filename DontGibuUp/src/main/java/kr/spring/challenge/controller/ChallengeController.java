@@ -40,7 +40,6 @@ import kr.spring.category.vo.ChallengeCategoryVO;
 import kr.spring.category.vo.DonationCategoryVO;
 import kr.spring.challenge.service.ChallengeService;
 import kr.spring.challenge.vo.ChallengeJoinVO;
-import kr.spring.challenge.vo.ChallengePaymentVO;
 import kr.spring.challenge.vo.ChallengeReviewVO;
 import kr.spring.challenge.vo.ChallengeVO;
 import kr.spring.challenge.vo.ChallengeVerifyVO;
@@ -144,7 +143,6 @@ public class ChallengeController {
 		boolean isJoined = false;
 		if (member != null) {
 			Map<String, Object> map = new HashMap<>();
-			map.put("chal_num", chal_num);
 			map.put("mem_num", member.getMem_num());
 			List<ChallengeJoinVO> joinList = challengeService.selectChallengeJoinList(map);
 			isJoined = joinList.stream().anyMatch(join -> join.getChal_num() == chal_num);
@@ -152,10 +150,6 @@ public class ChallengeController {
 
 		// 현재 참가 중인 인원 수 조회
 		int currentParticipants = challengeService.countCurrentParticipants(chal_num);
-
-		// 참여금을 포맷팅
-		NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-		String formattedFee = numberFormat.format(challenge.getChal_fee());
 
 		// 챌린지 리뷰 가져오기
 		List<ChallengeReviewVO> reviewList = challengeService.selectChallengeReviewList(chal_num);
@@ -166,7 +160,6 @@ public class ChallengeController {
 		ModelAndView mav = new ModelAndView("challengeView");
 		mav.addObject("challenge", challenge);
 		mav.addObject("isJoined", isJoined);
-		mav.addObject("formattedFee", formattedFee);
 		mav.addObject("currentParticipants", currentParticipants);
 		mav.addObject("reviewList", reviewList);
 		mav.addObject("averageRating", averageRating);

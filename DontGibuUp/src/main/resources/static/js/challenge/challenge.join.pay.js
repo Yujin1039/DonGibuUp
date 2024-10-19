@@ -135,7 +135,6 @@ function payAndEnroll2() {
 					data: JSON.stringify({
 						chal_pay_price: 0,
 						chal_point: usedPoints,
-						chal_pay_status: 0,
 						dcate_num: dcate_num,
 						chal_num: chal_num
 					}),
@@ -192,7 +191,6 @@ function payAndEnroll2() {
 										od_imp_uid: rsp.imp_uid,
 										chal_pay_price: data.response.amount,
 										chal_point: usedPoints,
-										chal_pay_status: 0,
 										dcate_num: dcate_num,
 										chal_num: chal_num // 챌린지 번호 포함
 									}),
@@ -247,7 +245,6 @@ function payAndEnroll() {
 				data: JSON.stringify({
 					chal_pay_price: 0,
 					chal_point: usedPoints,
-					chal_pay_status: 0,
 					dcate_num: dcate_num
 				}),
 				contentType: 'application/json; charset=utf-8',
@@ -301,7 +298,6 @@ function payAndEnroll() {
 									od_imp_uid: rsp.imp_uid,
 									chal_pay_price: data.response.amount,
 									chal_point: usedPoints,
-									chal_pay_status: 0,
 									dcate_num: dcate_num
 								}),
 								contentType: 'application/json; charset=utf-8',
@@ -339,9 +335,9 @@ function finalResult(param) {
 		sdate.setHours(0, 0, 0, 0);
 		alert('챌린지 개설이 완료되었습니다!');
 		if (sdate.getTime() == now.getTime()) {
-			window.location.href = pageContextPath + '/challenge/join/list?status=on';
+			window.location.replace('/challenge/join/list?status=on');
 		} else if (sdate > now) {
-			window.location.href = pageContextPath + '/challenge/join/list?status=pre';
+			window.location.replace('/challenge/join/list?status=pre');
 		}
 	} else {
 		alert('개설 오류 발생');

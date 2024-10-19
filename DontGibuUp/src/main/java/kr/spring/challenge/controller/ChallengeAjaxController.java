@@ -351,9 +351,6 @@ public class ChallengeAjaxController {
 		int chalPoint = (Integer) data.get("chal_point");
 		log.debug("chalPoint : " + chalPoint);
 		
-		int chalPayStatus = (Integer) data.get("chal_pay_status");
-		log.debug("chalPayStatus : " + chalPayStatus);
-		
 		int dcateNum = (Integer) data.get("dcate_num");
 		log.debug("dcateNum : " + dcateNum);
 		
@@ -448,12 +445,10 @@ public class ChallengeAjaxController {
 			HttpSession session, HttpServletRequest request) throws IllegalStateException, IOException{
 		int chalPayPrice = (Integer) data.get("chal_pay_price");					
 		int chalPoint = (Integer) data.get("chal_point");
-		int chalPayStatus = (Integer) data.get("chal_pay_status");
 		int dcateNum = (Integer) data.get("dcate_num");	
 		
 		log.debug("chalPayPrice : "+chalPayPrice);
 		log.debug("chalPoint : "+chalPoint);
-		log.debug("chalPayStatus : "+chalPayStatus);
 		log.debug("dcateNum : "+dcateNum);
 
 		Map<String,String> mapJson = new HashMap<>();

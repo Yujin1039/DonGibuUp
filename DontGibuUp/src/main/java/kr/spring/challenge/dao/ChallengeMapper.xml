@@ -249,13 +249,13 @@
 		<if test="od_imp_uid != null">
 			od_imp_uid,
 		</if>
-		chal_pay_price, chal_point, chal_pay_status)
+		chal_pay_price, chal_point)
 		VALUES
 		(chal_payment_seq.nextval, #{chal_joi_num}, #{mem_num},
 		<if test="od_imp_uid != null">
 			#{od_imp_uid},
 		</if>
-		#{chal_pay_price}, #{chal_point},#{chal_pay_status})
+		#{chal_pay_price}, #{chal_point})
 	</insert>
 
 	<!-- 챌린지 ID로 챌린지 참가 데이터 삭제 -->

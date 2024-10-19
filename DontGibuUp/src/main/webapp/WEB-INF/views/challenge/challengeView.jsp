@@ -59,6 +59,9 @@
             <c:when test="${isJoined}">
                 <button class="btn-custom" disabled>참가중</button>
             </c:when>
+            <c:when test="${currentParticipants >= challenge.chal_max}">
+            	<button class="btn-custom" disabled>모집완료</button>
+            </c:when>
             <c:otherwise>
                 <button class="btn-custom" onclick="location.href='join/write?chal_num=${challenge.chal_num}'">참가하기</button>
             </c:otherwise>
@@ -83,7 +86,7 @@
 	    <div class="row">
 	        <div class="col">
 	            <span>참여금</span>&nbsp;&nbsp;
-	            <p class="inline-text"><span style="color: blue;">${formattedFee}</span>원</p>
+	            <p class="inline-text"><span style="color: blue;"><fmt:formatNumber type="number" maxFractionDigits="3" value="${challenge.chal_fee}" /></span>원</p>
 	        </div>
 	        <div class="col">
 	            <span>모집 인원</span>&nbsp;&nbsp;
