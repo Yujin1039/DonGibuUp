@@ -383,13 +383,8 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 	//개별 챌린지 취소
 	@Override
-	public void cancelChallengeJoin(Long chal_joi_num,Long chal_num) throws IamportResponseException, IOException {
+	public void cancelChallengeJoin(Long chal_joi_num,Long chal_num) {
 		ChallengePaymentVO payVO = selectChallengePayment(chal_joi_num);	
-		String od_imp_uid = payVO.getOd_imp_uid();	
-
-		//결제 취소 요청하기
-		CancelData cancelData = new CancelData(od_imp_uid, true);
-		impClient.cancelPaymentByImpUid(cancelData);
 
 		//챌린지 결제 상태 - 취소
 		challengeMapper.updateChalPaymentStatus(payVO.getChal_joi_num());
@@ -430,15 +425,12 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 	//챌린지의 모든 참가 내역 및 결제 취소(리더 취소시)
 	@Override
-	public void cancelChallenge(Long chal_num) throws IamportResponseException, IOException {
-		//모든 결제 내역 불러오기
-		List<ChallengePaymentVO> payList = selectChallengePaymentList(chal_num);
-
+	public void cancelChallenge(Map<String,Object> data) {
+		List<ChallengePaymentVO> payList = (List) data.get("payList");
+		long chal_num = (Long) data.get("chal_num");
+		
 		//모든 결제 내역 취소하기
 		for(ChallengePaymentVO payVO : payList) {
-			CancelData cancelData = new CancelData(payVO.getOd_imp_uid(), true);
-			impClient.cancelPaymentByImpUid(cancelData);
-
 			//챌린지 결제 상태 - 취소
 			challengeMapper.updateChalPaymentStatus(payVO.getChal_joi_num());
 			//챌린지 참가 상태 - 취소
@@ -804,18 +796,15 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 	//챌린지 중단
 	@Override
-	public void cancelChallengeByAdmin(Map<String, Long> map) throws IamportResponseException, IOException {
-		Long chal_num = map.get("chal_num");
-		Long chal_phase = map.get("chal_phase");
+	public void cancelChallengeByAdmin(Map<String, Object> map) {
+		Long chal_num = (Long) map.get("chal_num");
+		int chal_phase = (Integer) map.get("chal_phase");		
 
 		//모든 결제 내역 불러오기
-		List<ChallengePaymentVO> payList = selectChallengePaymentList(chal_num);
+		List<ChallengePaymentVO> payList = (List) map.get("payList");
 
 		//모든 결제 내역 취소하기
 		for(ChallengePaymentVO payVO : payList) {
-			CancelData cancelData = new CancelData(payVO.getOd_imp_uid(), true);
-			impClient.cancelPaymentByImpUid(cancelData);
-
 			//챌린지 결제 상태 - 취소
 			challengeMapper.updateChalPaymentStatus(payVO.getChal_joi_num());
 			//챌린지 참가 상태 - 취소

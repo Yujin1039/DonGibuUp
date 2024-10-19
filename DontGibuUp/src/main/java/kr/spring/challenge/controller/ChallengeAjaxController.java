@@ -641,7 +641,7 @@ public class ChallengeAjaxController {
 		return mapJson;
 	}
 	
-	//챌린지 참가 삭제
+	//챌린지 참가 취소(챌린지 삭제)
 	@PostMapping("/challenge/join/delete")
 	public ResponseEntity<String> deleteChallengeJoin(@RequestBody Map<String,Object> requestData, HttpSession session) {
 		try {
@@ -656,11 +656,34 @@ public class ChallengeAjaxController {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("챌린지 참가 정보가 없거나 권한이 없습니다.");
 			}
 			
-			if(isLeader) {			
+			long chal_num = challengeJoin.getChal_num();
+			
+			if(isLeader) {
+				//토스페이먼츠사 다건 결제 취소(외부 api)
+				//모든 결제 내역 불러오기
+				List<ChallengePaymentVO> payList = challengeService.selectChallengePaymentList(chal_num);
+
+				//모든 결제 내역 취소하기
+				for(ChallengePaymentVO payVO : payList) {
+					CancelData cancelData = new CancelData(payVO.getOd_imp_uid(), true);
+					impClient.cancelPaymentByImpUid(cancelData);
+				}
+				Map<String,Object> data = new HashMap<>();
+				data.put("chal_num", chal_num);
+				data.put("payList", payList);
+								
 				//결제,참가 상태 및 포인트 변경,챌린지 톡방 환영 메시지 삭제,챌린지 취소
-				challengeService.cancelChallenge(challengeJoin.getChal_num());				
+				challengeService.cancelChallenge(data);				
 			}else {
-				challengeService.cancelChallengeJoin(chal_joi_num,challengeJoin.getChal_num());
+				//토스페이먼츠사 단건 결제 취소(외부 api)
+				ChallengePaymentVO payVO = challengeService.selectChallengePayment(chal_joi_num);	
+				String od_imp_uid = payVO.getOd_imp_uid();
+				
+				CancelData cancelData = new CancelData(od_imp_uid, true);
+				impClient.cancelPaymentByImpUid(cancelData);
+				
+				//결제,참가 상태 및 포인트 변경
+				challengeService.cancelChallengeJoin(chal_joi_num,chal_num);
 			}	
 			//세션에 포인트 반영
 			ChallengePaymentVO payVO = challengeService.selectChallengePayment(chal_joi_num);
@@ -677,7 +700,7 @@ public class ChallengeAjaxController {
 	//관리자의 챌린지 중단
 	@PostMapping("/admin/cancelChallengeByAdmin")
 	@ResponseBody
-	public Map<String,String> cancelChallengeByAdmin(@RequestBody Map<String,Long> data, HttpSession session) throws IamportResponseException, IOException {		
+	public Map<String,String> cancelChallengeByAdmin(@RequestBody Map<String,Object> data, HttpSession session) throws IamportResponseException, IOException {		
 		Map<String,String> mapJson = new HashMap<>();
 		
 		MemberVO user = (MemberVO) session.getAttribute("user");
@@ -687,6 +710,17 @@ public class ChallengeAjaxController {
 		}else if(user.getMem_status() != 9) {
 			mapJson.put("result", "noAuthority");
 		}else {
+			//토스페이먼츠사 다건 결제 취소(외부 api)
+			//모든 결제 내역 불러오기
+			long chal_num = (Long) data.get("chal_num");
+			List<ChallengePaymentVO> payList = challengeService.selectChallengePaymentList(chal_num);
+
+			//모든 결제 내역 취소하기
+			for(ChallengePaymentVO payVO : payList) {
+				CancelData cancelData = new CancelData(payVO.getOd_imp_uid(), true);
+				impClient.cancelPaymentByImpUid(cancelData);
+			}
+			data.put("payList", payList);
 			challengeService.cancelChallengeByAdmin(data);
 			mapJson.put("result", "success");
 		}		

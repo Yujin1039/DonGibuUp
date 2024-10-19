@@ -25,7 +25,7 @@ public interface ChallengeService {
 	public ChallengeVO selectChallenge(Long chal_num);
 	public void updateChallenge(Long chal_num);
 	//동일 챌린지의 모든 결제,참가 취소 및 챌린지 삭제
-    public void cancelChallenge(Long chal_num) throws IamportResponseException, IOException;
+    public void cancelChallenge(Map<String,Object> data);
 	public void deleteChalPhoto(Long chal_num);
 	//참가 인원수 조회
 	public int countCurrentParticipants(long chal_num);
@@ -39,7 +39,7 @@ public interface ChallengeService {
 	public List<ChallengeJoinVO> selectJoinMemberList(Map<String,Object> map);
 	public void deleteChallengeJoinsByChallengeId(Long chal_num);
 	//단건 참가 취소
-	public void cancelChallengeJoin(Long chal_joi_num,Long chal_num) throws IamportResponseException, IOException;    
+	public void cancelChallengeJoin(Long chal_joi_num,Long chal_num);    
     //리더 여부 확인
 	public boolean isChallengeLeader(Long chal_num, Long mem_num);
 	//리더 chal_joi_num 확인하기
@@ -103,7 +103,7 @@ public interface ChallengeService {
     //챌린지 레코드 수
     public int selectChallengeCount(Map<String, Object> map);
     //챌린지 중단
-    public void cancelChallengeByAdmin(Map<String, Long> map) throws IamportResponseException, IOException;
+    public void cancelChallengeByAdmin(Map<String, Object> map);
 
     //*챌린지 메인*//
     //인기 챌린지
