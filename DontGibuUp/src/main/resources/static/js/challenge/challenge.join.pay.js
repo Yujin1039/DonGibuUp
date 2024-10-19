@@ -199,7 +199,18 @@ function payAndEnroll2() {
 									contentType: 'application/json; charset=utf-8',
 									dataType: 'json',
 									success: function(param) {
-										finalResult(param);
+										if (param.result == 'logout') {
+											alert('로그인 후 사용해주세요.');
+										} else if (param.result == 'success') {
+											alert('챌린지 참가 신청이 완료되었습니다!');
+											if (sdate.getTime() == now.getTime()) {
+												window.location.href = pageContextPath + '/challenge/join/list?status=on';
+											} else if (sdate > now) {
+												window.location.href = pageContextPath + '/challenge/join/list?status=pre';
+											}
+										} else {
+											alert('참가 정보 저장 중 오류가 발생했습니다.');
+										}
 									},
 									error: function(xhr, status, error) {
 										alert('챌린지 신청 오류 발생: ' + error);
@@ -227,7 +238,7 @@ function payAndEnroll() {
 	let usedPoints = convertToNumber($('.used-point').val());
 	let dcate_num = parseInt($('input[type="radio"]:checked').val());
 	shouldIgnoreBeforeUnload = true;
-	
+
 	if (finalFee == 0) {//전액 포인트 결제
 		if (confirm('전액 포인트로 결제하시겠습니까?')) {
 			$.ajax({
@@ -236,6 +247,7 @@ function payAndEnroll() {
 				data: JSON.stringify({
 					chal_pay_price: 0,
 					chal_point: usedPoints,
+					chal_pay_status: 0,
 					dcate_num: dcate_num
 				}),
 				contentType: 'application/json; charset=utf-8',
@@ -244,7 +256,7 @@ function payAndEnroll() {
 					finalResult(param);
 				},
 				error: function() {
-					alert('챌린지 개설 포인트 결제 오류 발생');
+					alert('기부하기 오류 발생');
 				}
 			});
 
@@ -266,27 +278,46 @@ function payAndEnroll() {
 				currency: "KRW"
 			},
 			(rsp) => {
+				//console.log(rsp.error_code);
 				if (!rsp.error_code) {
 					//결제 로직(리더): 결제 요청 -> 결제 검증 -> 결제 처리 및 완료 (REST API 이용)
 					//결제 로직(회원): 사전 검증 -> 결제 요청 -> 사후 검증 -> 결제 처리 및 완료
+					//OR 검증 구현 안하고 바로 처리하기
 
-					//결제 정보 처리 및 완료하기
+					//결제 검증하기
 					$.ajax({
-						url: '/challenge/payAndEnroll/',
-						method: 'POST',
-						data: JSON.stringify({
-							imp_uid: rsp.imp_uid,
-							chal_pay_price: finalFee,
-							chal_point: usedPoints,
-							dcate_num: dcate_num
-						}),
-						contentType: 'application/json; charset=utf-8',
-						dataType: 'json',
-						success: function(param) {
-							finalResult(param);
-						},
-						error: function() {
-							alert('챌린지 개설 결제 오류 발생');
+						url: '/challenge/paymentVerify/' + rsp.imp_uid,
+						method: 'POST'
+					}).done(function(data) {
+						if (data.response.status == 'paid') {
+							console.log('검증 success');
+							console.log('dcate_num >> ' + dcate_num);
+
+							//결제 정보 처리 및 완료하기
+							$.ajax({
+								url: '/challenge/payAndEnroll',
+								method: 'POST',
+								data: JSON.stringify({
+									od_imp_uid: rsp.imp_uid,
+									chal_pay_price: data.response.amount,
+									chal_point: usedPoints,
+									chal_pay_status: 0,
+									dcate_num: dcate_num
+								}),
+								contentType: 'application/json; charset=utf-8',
+								dataType: 'json',
+								success: function(param) {
+									finalResult(param);
+								},
+								error: function() {
+									//챌린지 결제 취소하기!!메서드 넣기
+									alert('챌린지 개설 오류 발생');
+								}
+							});
+						} else if (data.response.status == 'failed') {
+							alert('결제가 위조되었거나 로그아웃된 상태입니다.');
+						} else {
+							alert('오류가 발생했습니다.');
 						}
 					});
 				} else {
@@ -299,25 +330,20 @@ function payAndEnroll() {
 }
 
 function finalResult(param) {
-	console.log(param.sdate+'param.sdate');
 	if (param.result == 'logout') {
 		alert('로그인 후 사용해주세요.');
-	}else if(param.result == 'forgery'){
-		alert(`결제금액 사전 위조 발생!`);
-	}else if(param.result == 'failed'){
-		alert(`결제금액 사후 위조 발생!`);
-	}else if (param.result == 'paid') {
+	} else if (param.result == 'success') {
 		let sdate = new Date(param.sdate);
 		let now = new Date();
 		now.setHours(0, 0, 0, 0); // 시간 부분을 0으로 설정
 		sdate.setHours(0, 0, 0, 0);
 		alert('챌린지 개설이 완료되었습니다!');
 		if (sdate.getTime() == now.getTime()) {
-			window.location.replace('/challenge/join/list?status=on');
-		} else {
-			window.location.replace('/challenge/join/list?status=pre');
+			window.location.href = pageContextPath + '/challenge/join/list?status=on';
+		} else if (sdate > now) {
+			window.location.href = pageContextPath + '/challenge/join/list?status=pre';
 		}
 	} else {
-		alert('챌린지 개설 오류 발생');
+		alert('개설 오류 발생');
 	}
 }

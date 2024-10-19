@@ -22,6 +22,28 @@
 						<a href="#" class="category-link tags-block-link" data-category="${cate.ccate_num}">${cate.ccate_name}</a>
 					</c:forEach>
 				</div>				
+				<%-- <form class="custom-form donate-form" action="#" method="get"
+					role="form">
+					<div class="row" style="padding-left: 250px; padding-right: 250px;">
+						<div class="col-lg-6 col-6 form-check-group form-check-group-donation-frequency">
+						    <div class="form-check form-check-radio">
+						        <input class="form-check-input" type="radio" name="DonationFrequency" id="DonationFrequencyOne" checked>
+						        <label class="form-check-label" for="DonationFrequencyOne" style="cursor: pointer;">
+						            참가 가능한 챌린지
+						        </label>
+						    </div>
+						</div>
+						<div class="col-lg-6 col-6 form-check-group form-check-group-donation-frequency">
+							<div class="form-check form-check-radio">
+								<input class="form-check-input" type="radio"
+									name="DonationFrequency" id="DonationFrequencyMonthly">
+								<label class="form-check-label" for="DonationFrequencyMonthly">
+									<a href="pastList">지난 챌린지</a> </label>
+							</div>
+						</div>
+					</div>
+					<br>
+				</form> --%>
 			</div>			
 		</div>
 		<br>
