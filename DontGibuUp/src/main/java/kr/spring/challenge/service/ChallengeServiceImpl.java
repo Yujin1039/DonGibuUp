@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.siot.IamportRestClient.IamportClient;
 
 import kr.spring.challenge.dao.ChallengeMapper;
+import kr.spring.challenge.exception.MaxParticipantsExceededException;
 import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.challenge.vo.ChallengeFavVO;
 import kr.spring.challenge.vo.ChallengeJoinVO;
@@ -135,12 +136,12 @@ public class ChallengeServiceImpl implements ChallengeService{
 	@Override
 	public void insertChallengeJoin(ChallengeJoinVO chalJoinVO, ChallengePaymentVO chalPayVO) {
 		//챌린지 참가인원 업데이트
-		challengeMapper.addChallengeJoinNum(chalJoinVO.getChal_num());
+		isMaxParticipants(chalJoinVO.getChal_num());
 		
 		//챌린지 참가 정보 저장
 		chalJoinVO.setChal_joi_num(challengeMapper.selectChal_joi_num());
 		challengeMapper.insertChallengeJoin(chalJoinVO);
-		
+
 		//챌린지 결제 정보 저장
 		chalPayVO.setChal_joi_num(chalJoinVO.getChal_joi_num());
 		challengeMapper.insertChallengePayment(chalPayVO);
@@ -177,6 +178,19 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 		//알림 로그 찍기
 		notifyService.insertNotifyLog(notifyVO, dynamicValues);
+	}
+
+	@Override
+	public void isMaxParticipants(Long chal_num) {
+		//락 설정
+		ChallengeVO challenge = challengeMapper.selectChallengeForUpdate(chal_num);
+
+		//챌린지 참가인원 업데이트
+		if(challenge.getChal_join() < challenge.getChal_max()) {
+			challengeMapper.addChallengeJoinNum(chal_num);			
+		}else {
+			throw new MaxParticipantsExceededException("모집이 마감되었습니다.");
+		}
 	}
 
 	@Override
@@ -412,7 +426,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 	public void cancelChallenge(Map<String,Object> data) {
 		List<ChallengePaymentVO> payList = (List) data.get("payList");
 		long chal_num = (Long) data.get("chal_num");
-		
+
 		//모든 결제 내역 취소하기
 		for(ChallengePaymentVO payVO : payList) {
 			//챌린지 결제 상태 - 취소
@@ -448,7 +462,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 
 		//챌린지 톡방 환영 메시지 삭제
 		challengeMapper.deleteChallengeChat(chal_num);
-		
+
 		//챌린지 좋아요 삭제
 		challengeMapper.deleteAllFav(chal_num);
 
@@ -826,12 +840,12 @@ public class ChallengeServiceImpl implements ChallengeService{
 		}else if(chal_phase == 1){//진행 중인 챌린지 중단
 			//챌린지 채팅방 삭제
 			deleteChallengeChat(chal_num);
-			
+
 			//챌린지 인증 신고 & 기록 삭제
 			Map<String, Object> rptMap = new HashMap<>();
 			rptMap.put("chal_num", chal_num);
 			List<ChallengeJoinVO> joinList = selectJoinMemberList(rptMap);
-			
+
 			for(ChallengeJoinVO join : joinList) {
 				challengeMapper.deleteVerifyReport(join.getMem_num()); 	
 				challengeMapper.deleteChallengeVerifyByChalJoiNum(join.getChal_joi_num());
@@ -839,7 +853,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 		}
 		//챌린지 좋아요 삭제
 		challengeMapper.deleteAllFav(chal_num);
-		
+
 		//챌린지 상태 - 취소
 		challengeMapper.updateChallengeStatus(chal_num);
 	}	

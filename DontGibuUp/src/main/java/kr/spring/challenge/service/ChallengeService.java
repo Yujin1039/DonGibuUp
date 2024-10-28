@@ -39,6 +39,8 @@ public interface ChallengeService {
 	public boolean isChallengeLeader(Long chal_num, Long mem_num);
 	//리더 chal_joi_num 확인하기
 	public Long selectLeaderJoiNum(Long chal_num);
+	//참가 가능 여부 처리
+	public void isMaxParticipants(Long chal_num);
 	
 	//후기 작성 여부
 	public ChallengeReviewVO selectChallengeReviewByMemberAndChallenge(Map<String, Object> map);

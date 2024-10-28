@@ -38,6 +38,9 @@ public interface ChallengeMapper {
 	@Select("SELECT chal_join_seq.nextval FROM dual")
 	public Long selectChal_joi_num();
     public void insertChallengeJoin(ChallengeJoinVO chalJoinVO);
+    //참여 락 설정
+    @Select("SELECT chal_join FROM challenge WHERE chal_num=#{chal_num} FOR UPDATE")
+    public ChallengeVO selectChallengeForUpdate(long chal_num);
     //참가인원 추가
     @Update("UPDATE challenge SET chal_join=chal_join+1 WHERE chal_num=#{chal_num}")
     public void addChallengeJoinNum(Long chal_num);

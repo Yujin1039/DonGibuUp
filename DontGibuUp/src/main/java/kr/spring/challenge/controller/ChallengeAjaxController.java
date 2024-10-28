@@ -32,6 +32,7 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 
 import kr.spring.category.service.CategoryService;
+import kr.spring.challenge.exception.MaxParticipantsExceededException;
 import kr.spring.challenge.service.ChallengeService;
 import kr.spring.category.vo.ChallengeCategoryVO;
 import kr.spring.challenge.vo.ChallengeChatVO;
@@ -360,7 +361,7 @@ public class ChallengeAjaxController {
 	@PostMapping("/challenge/payAndEnrollWrite")
 	@ResponseBody
 	public Map<String, String> saveChallengeInfoWrite(@RequestBody Map<String, Object> data, HttpSession session, HttpServletRequest request)
-			throws IllegalStateException, IOException {
+			throws IllegalStateException, IOException, IamportResponseException {
 		int chalPayPrice = (Integer) data.get("chal_pay_price");
 		log.debug("chalPayPrice : " + chalPayPrice);
 		
@@ -409,7 +410,15 @@ public class ChallengeAjaxController {
 				}
 				
 				mapJson.put("result", "success");
-			} catch (Exception e) {
+			} catch (MaxParticipantsExceededException e) {
+				//결제 취소 요청하기
+				if(chalPayPrice > 0) {
+					String imp_uid = (String) data.get("od_imp_uid");
+					CancelData cancelData = new CancelData(imp_uid, true);
+					impClient.cancelPaymentByImpUid(cancelData);
+				}				
+				mapJson.put("result", "maxExceeded");
+			}catch (Exception e) {
 				log.error("챌린지 참가 및 결제 정보 저장 중 오류 발생", e);
 				mapJson.put("result", "error");
 				mapJson.put("message", "챌린지 참가 및 결제 정보 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.");
