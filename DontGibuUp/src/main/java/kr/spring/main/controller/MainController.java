@@ -43,20 +43,14 @@ public class MainController {
 	@GetMapping("/main/main")
 	public String main(Model model) {
 		TotalVO totalVO = dataService.selectTotalMain();
+		
 		List<ChallengeVO> popularChallenges = challengeService.getPopularChallenges();
-		Map<Long, Integer> currentParticipantsMap = new HashMap<>();
-		for (ChallengeVO challenge : popularChallenges) {
-		    int currentParticipants = challengeService.countCurrentParticipants(challenge.getChal_num());
-		    currentParticipantsMap.put(challenge.getChal_num(), currentParticipants);
-		}
 		List<ChallengeVO> exerciseChallenges = challengeService.getExerciseChallenges();
-
 		List<DonationCategoryVO> categorylist = categoryService.selectList();
 		
 		model.addAttribute("categorylist",categorylist);
 		model.addAttribute("totalVO", totalVO);
 		model.addAttribute("popularChallenges", popularChallenges);
-		model.addAttribute("currentParticipantsMap", currentParticipantsMap);
 		model.addAttribute("exerciseChallenges", exerciseChallenges);
 	    
 		 // 최신 상품 하나만 가져오기

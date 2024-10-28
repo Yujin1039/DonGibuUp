@@ -303,7 +303,23 @@ public class ChallengeAjaxController {
 	public void initImp() {
 		this.impClient = new IamportClient(apiKey,secretKey);
 	}
-
+	
+	// 결제 인원 확인하기
+	@PostMapping("/challenge/checkJoinNum")
+	@ResponseBody
+	public Map<String,Boolean> checkJoinNum(Long chal_num){
+		log.info("chal_num = {}",chal_num);
+		
+		Map<String,Boolean> map = new HashMap<>();
+		ChallengeVO challenge = challengeService.selectChallenge(chal_num);
+		if(challenge.getChal_join() >= challenge.getChal_max()) {
+			map.put("result", false);
+		}else {
+			map.put("result", true);
+		}
+		return map;
+	}
+	
 	// 결제 정보 검증하기
 	@PostMapping("/challenge/paymentVerifyWrite/{imp_uid}")
 	@ResponseBody
@@ -354,7 +370,7 @@ public class ChallengeAjaxController {
 		int dcateNum = (Integer) data.get("dcate_num");
 		log.debug("dcateNum : " + dcateNum);
 		
-		long chalNum = Long.parseLong( (String) data.get("chal_num"));		
+		long chalNum = Long.parseLong((String) data.get("chal_num"));		
 		log.debug("chalNum : " + chalNum);
 
 		Map<String, String> mapJson = new HashMap<>();
@@ -406,8 +422,7 @@ public class ChallengeAjaxController {
 	//결제 정보 검증 (리더)
 	@PostMapping("/challenge/paymentVerify/{imp_uid}")
 	@ResponseBody
-	public IamportResponse<Payment> validateIamport(@PathVariable String imp_uid,HttpSession session,
-			HttpServletRequest request) throws IamportResponseException, IOException{        
+	public IamportResponse<Payment> validateIamport(@PathVariable String imp_uid,HttpSession session) throws IamportResponseException, IOException{        
 		IamportResponse<Payment> payment = impClient.paymentByImpUid(imp_uid);
 
 		//로그인 여부 확인하기

@@ -33,14 +33,17 @@ public interface ChallengeMapper {
 	@Update("UPDATE challenge SET chal_status=1 WHERE chal_num=#{chal_num}")
 	public void updateChallengeStatus(Long chal_num);
 	public void deleteChalPhoto(Long chal_num);
-	//참가 인원수 조회
-    @Select("SELECT COUNT(*) FROM chal_join WHERE chal_num = #{chal_num} AND chal_joi_status = 0")
-    public int countCurrentParticipants(long chal_num);
 	
 	//*챌린지 참가*//
 	@Select("SELECT chal_join_seq.nextval FROM dual")
 	public Long selectChal_joi_num();
     public void insertChallengeJoin(ChallengeJoinVO chalJoinVO);
+    //참가인원 추가
+    @Update("UPDATE challenge SET chal_join=chal_join+1 WHERE chal_num=#{chal_num}")
+    public void addChallengeJoinNum(Long chal_num);
+    //참가인원 감소
+    @Update("UPDATE challenge SET chal_join=chal_join-1 WHERE chal_num=#{chal_num}")
+    public void deleteChallengeJoinNum(Long chal_num);
     public Integer selectChallengeJoinListRowCount(Map<String,Object> map);
     public List<ChallengeJoinVO> selectChallengeJoinList(Map<String,Object> map);
     public ChallengeJoinVO selectChallengeJoin(Long chal_joi_num);

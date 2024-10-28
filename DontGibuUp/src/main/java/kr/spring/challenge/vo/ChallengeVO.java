@@ -45,6 +45,7 @@ public class ChallengeVO {
 	private Date chal_rdate;
 	private String chal_ip;
 	private Integer chal_status;
+	private Integer chal_join;
 	
 	private String chal_edate;
 	private String mem_nick;
@@ -52,7 +53,7 @@ public class ChallengeVO {
 	private String categoryName;
 	private Integer chal_phase;   //0:시작 전,1:진행 중,2:완료
 	private Integer fav;		  //좋아요 수
-	private Integer attendance;
+	//private Integer attendance;
 	
 	public void calculateChalEdate() {
 		LocalDate sdate = LocalDate.parse(chal_sdate,DateTimeFormatter.ISO_LOCAL_DATE);

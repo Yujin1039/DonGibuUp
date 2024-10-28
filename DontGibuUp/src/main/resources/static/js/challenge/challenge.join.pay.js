@@ -111,8 +111,7 @@ function totalPayment(point, originalFee) {
 function payAndEnroll2() {
 	let finalFee = convertToNumber($('.final_fee').text());
 	let usedPoints = convertToNumber($('.used-point').val());
-	let dcate_num = parseInt($('input[type="radio"]:checked').val());
-	let chal_num = $('#chal_num').val();
+	let dcate_num = parseInt($('input[type="radio"]:checked').val());	
 
 	let sdate = new Date(s_date);
 	let now = new Date();
@@ -125,109 +124,124 @@ function payAndEnroll2() {
 	if (sdate.getTime() == now.getTime()) {
 		startToday = !confirm('오늘 시작하는 챌린지는 취소 신청이 불가합니다. 신청하시겠습니까?');
 	}
-
+	console.log('chal_num: '+chal_num);
 	if (!startToday) {
-		if (finalFee == 0) {//전액 포인트 결제
-			if (confirm('전액 포인트로 결제하시겠습니까?')) {
-				$.ajax({
-					url: '/challenge/payAndEnrollWrite',
-					method: 'POST',
-					data: JSON.stringify({
-						chal_pay_price: 0,
-						chal_point: usedPoints,
-						dcate_num: dcate_num,
-						chal_num: chal_num
-					}),
-					contentType: 'application/json; charset=utf-8',
-					dataType: 'json',
-					success: function(param) {
-						if (param.result == 'logout') {
-							alert('로그인 후 사용해주세요.');
-						} else if (param.result == 'success') {
-							alert('챌린지 참가 신청이 완료되었습니다!');
-							if (sdate.getTime() == now.getTime()) {
-								window.location.href = pageContextPath + '/challenge/join/list?status=on';
-							} else if (sdate > now) {
-								window.location.href = pageContextPath + '/challenge/join/list?status=pre';
-							}
-						} else {
-							alert('참가 정보 저장 중 오류가 발생했습니다.');
-						}
-					},
-					error: function() {
-						alert('챌린지 참가 오류 발생');
-					}
-				});
-
-			}
-		} else if (finalFee >= 1 && finalFee <= 99) {//결제금액이 1~99원일 경우
-			alert('결제는 100원 이상부터 가능합니다.');
-		} else {
-			IMP.init("imp71075330");
-			IMP.request_pay(
-				{
-					pg: "tosspayments",
-					merchant_uid: "merchant_" + new Date().getTime(),
-					name: chalTitle,
-					pay_method: "card",
-					amount: finalFee,
-					custom_data: { usedPoints: usedPoints },
-					buyer_name: memberNick,
-					buyer_email: memberEmail,
-					currency: "KRW"
-				},
-				(rsp) => {
-					if (!rsp.error_code) {
-						$.ajax({
-							url: '/challenge/paymentVerifyWrite/' + rsp.imp_uid,
-							method: 'POST',
-							data: { chal_num: chal_num }
-						}).done(function(data) {
-							if (data.response.status == 'paid') {
-								$.ajax({
-									url: '/challenge/payAndEnrollWrite',
-									method: 'POST',
-									data: JSON.stringify({
-										od_imp_uid: rsp.imp_uid,
-										chal_pay_price: data.response.amount,
-										chal_point: usedPoints,
-										dcate_num: dcate_num,
-										chal_num: chal_num // 챌린지 번호 포함
-									}),
-									contentType: 'application/json; charset=utf-8',
-									dataType: 'json',
-									success: function(param) {
-										if (param.result == 'logout') {
-											alert('로그인 후 사용해주세요.');
-										} else if (param.result == 'success') {
-											alert('챌린지 참가 신청이 완료되었습니다!');
-											if (sdate.getTime() == now.getTime()) {
-												window.location.href = pageContextPath + '/challenge/join/list?status=on';
-											} else if (sdate > now) {
-												window.location.href = pageContextPath + '/challenge/join/list?status=pre';
-											}
-										} else {
-											alert('참가 정보 저장 중 오류가 발생했습니다.');
+		$.ajax({
+			url: '/challenge/checkJoinNum',
+			method: 'POST',
+			data: { chal_num: chal_num },
+			success: function(param) {
+				if (param.result == true) {
+					if (finalFee == 0) {//전액 포인트 결제
+						if (confirm('전액 포인트로 결제하시겠습니까?')) {
+							$.ajax({
+								url: '/challenge/payAndEnrollWrite',
+								method: 'POST',
+								data: JSON.stringify({
+									chal_pay_price: 0,
+									chal_point: usedPoints,
+									dcate_num: dcate_num,
+									chal_num: chal_num
+								}),
+								contentType: 'application/json; charset=utf-8',
+								dataType: 'json',
+								success: function(param) {
+									if (param.result == 'logout') {
+										alert('로그인 후 사용해주세요.');
+									} else if (param.result == 'success') {
+										alert('챌린지 참가 신청이 완료되었습니다!');
+										if (sdate.getTime() == now.getTime()) {
+											window.location.href = pageContextPath + '/challenge/join/list?status=on';
+										} else if (sdate > now) {
+											window.location.href = pageContextPath + '/challenge/join/list?status=pre';
 										}
-									},
-									error: function(xhr, status, error) {
-										alert('챌린지 신청 오류 발생: ' + error);
+									} else {
+										alert('참가 정보 저장 중 오류가 발생했습니다.');
 									}
-								});
-							} else if (data.response.status == 'failed') {
-								alert('결제 위조 오류 발생!');
-							} else {
-								alert('결제 검증 중 오류가 발생했습니다.');
-							}
-						}).fail(function(jqXHR, textStatus, errorThrown) {
-							alert('결제 검증 요청 실패: ' + errorThrown);
-						});
+								},
+								error: function() {
+									alert('챌린지 참가 오류 발생');
+								}
+							});
+
+						}
+					} else if (finalFee >= 1 && finalFee <= 99) {//결제금액이 1~99원일 경우
+						alert('결제는 100원 이상부터 가능합니다.');
 					} else {
-						alert('결제를 취소하셨습니다.');
+						IMP.init("imp71075330");
+						IMP.request_pay(
+							{
+								pg: "tosspayments",
+								merchant_uid: "merchant_" + new Date().getTime(),
+								name: chalTitle,
+								pay_method: "card",
+								amount: finalFee,
+								custom_data: { usedPoints: usedPoints },
+								buyer_name: memberNick,
+								buyer_email: memberEmail,
+								currency: "KRW"
+							},
+							(rsp) => {
+								if (!rsp.error_code) {
+									$.ajax({
+										url: '/challenge/paymentVerifyWrite/' + rsp.imp_uid,
+										method: 'POST',
+										data: { chal_num: chal_num }
+									}).done(function(data) {
+										if (data.response.status == 'paid') {
+											$.ajax({
+												url: '/challenge/payAndEnrollWrite',
+												method: 'POST',
+												data: JSON.stringify({
+													od_imp_uid: rsp.imp_uid,
+													chal_pay_price: data.response.amount,
+													chal_point: usedPoints,
+													dcate_num: dcate_num,
+													chal_num: chal_num // 챌린지 번호 포함
+												}),
+												contentType: 'application/json; charset=utf-8',
+												dataType: 'json',
+												success: function(param) {
+													if (param.result == 'logout') {
+														alert('로그인 후 사용해주세요.');
+													} else if (param.result == 'success') {
+														alert('챌린지 참가 신청이 완료되었습니다!');
+														if (sdate.getTime() == now.getTime()) {
+															window.location.href = pageContextPath + '/challenge/join/list?status=on';
+														} else if (sdate > now) {
+															window.location.href = pageContextPath + '/challenge/join/list?status=pre';
+														}
+													} else {
+														alert('참가 정보 저장 중 오류가 발생했습니다.');
+													}
+												},
+												error: function(xhr, status, error) {
+													alert('챌린지 신청 오류 발생: ' + error);
+												}
+											});
+										} else if (data.response.status == 'failed') {
+											alert('결제 위조 오류 발생!');
+										} else {
+											alert('결제 검증 중 오류가 발생했습니다.');
+										}
+									}).fail(function(jqXHR, textStatus, errorThrown) {
+										alert('결제 검증 요청 실패: ' + errorThrown);
+									});
+								} else {
+									alert('결제를 취소하셨습니다.');
+								}
+							}
+						);
 					}
+				} else if (param.result == false) {
+					alert(`챌린지[${chalTitle}] 모집이 마감되었습니다.`);
+					window.location.replace('/challenge/detail?chal_num=${chal_num}');
 				}
-			);
-		}
+			},
+			error: function() {
+				alert('참가자 확인 오류 발생');
+			}
+		});
 	}
 }
 

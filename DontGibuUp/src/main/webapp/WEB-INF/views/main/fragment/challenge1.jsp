@@ -98,7 +98,7 @@
                     </p>
                     <h3>${challenge.chal_title}</h3>
 			        <p class="participation-rate" style="color:#ff5757; margin-top:5px;">
-			            <c:set var="participationRate" value="${(currentParticipantsMap[challenge.chal_num] * 100.0) / challenge.chal_max}" />
+			            <c:set var="participationRate" value="${(challenge.chal_join * 100.0) / challenge.chal_max}" />
 			            <b><c:out value="${fn:substringBefore(participationRate, '.')}" />% 달성</b>
 			        </p>
                 </div>

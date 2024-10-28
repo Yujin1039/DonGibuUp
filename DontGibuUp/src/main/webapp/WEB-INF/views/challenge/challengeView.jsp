@@ -59,7 +59,7 @@
             <c:when test="${isJoined}">
                 <button class="btn-custom" disabled>참가중</button>
             </c:when>
-            <c:when test="${currentParticipants >= challenge.chal_max}">
+            <c:when test="${challenge.chal_join >= challenge.chal_max}">
             	<button class="btn-custom" disabled>모집완료</button>
             </c:when>
             <c:otherwise>
@@ -90,7 +90,7 @@
 	        </div>
 	        <div class="col">
 	            <span>모집 인원</span>&nbsp;&nbsp;
-	            <p class="inline-text"><span style="color: red;">${currentParticipants}명</span> / ${challenge.chal_max}명</p>
+	            <p class="inline-text"><span style="color: red;">${challenge.chal_join}명</span> / ${challenge.chal_max}명</p>
 	        </div>
 	    </div>
 	</div>

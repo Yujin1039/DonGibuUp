@@ -39,7 +39,7 @@
 									</c:when>
 									<c:when test="${status == 'on'}">
 										<a class="orange-custom" href="${pageContext.request.contextPath}/challenge/verify/list?chal_num=${challengeJoin.chal_num}&chal_joi_num=${challengeJoin.chal_joi_num}&status=${status}">인증내역</a>
-										<c:if test="${challengeData.total_count > 1}">
+										<c:if test="${challengeData.join_num > 1}">
 											<a class="gray-custom chal_talk" href="#" data-chal-num="${challengeJoin.chal_num}"
 											data-chal-joi-num="${challengeJoin.chal_joi_num}" data-status="${status}">단체톡방</a>
 										</c:if>										

@@ -13,6 +13,7 @@
         let pageContextPath = "${pageContext.request.contextPath}";
         let s_date = "${challengeVO.chal_sdate}"; //챌린지 시작 날짜 가져오기
         let mem_point = ${mem_point};
+        let chal_num = "${challengeVO.chal_num}";
 </script>
 <script src="${pageContext.request.contextPath}/js/challenge/challenge.join.pay.js"></script>
 <br><br><br><br>
@@ -39,7 +40,6 @@
 		</div>
 	</div>
 	<form:form id="challenge_join" enctype="multipart/form-data" modelAttribute="challengeJoinVO">
-		<form:hidden path="chal_num" value="${challengeJoinVO.chal_num}" />
 		<label for="dcate_num"><h6 style="color: #212529;">기부 카테고리</h6></label>&nbsp;
 		<span id="charityInfo"></span> 
 		<span id="dcate_num_error" class="error-color" style="display: none;">기부 카테고리를 선택하세요.</span>

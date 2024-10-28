@@ -2,19 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/challenge.css">
-    <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
-    <script>
-        var contextPath = '<%= request.getContextPath() %>';
-    </script>
-    <script src="${pageContext.request.contextPath}/js/challenge/challenge.fav.js"></script>
-</head>
-<body>
-<br>
+<script src="${pageContext.request.contextPath}/js/jquery-3.7.1.min.js"></script>
+<script>
+    var contextPath = '<%= request.getContextPath() %>';
+</script>
+<script src="${pageContext.request.contextPath}/js/challenge/challenge.fav.js"></script>
 <div class="challenge-detail">
     <div class="challenge-header">
         <c:if test="${empty challenge.chal_photo}">
@@ -62,7 +54,7 @@
         </div>
         <div>
             <span>모집 인원</span>
-            <p><span style="color: red;">${currentParticipants}명</span> / ${challenge.chal_max}명</p>
+            <p><span style="color: red;">${challenge.chal_join}명</span> / ${challenge.chal_max}명</p>
         </div>
         
  <%--        		<p><strong>총 참여금:</strong> <fmt:formatNumber value="${totalFee}" type="number" />원</p>
@@ -74,5 +66,3 @@
     </div>
     <hr> 
 </div>
-</body>
-</html>

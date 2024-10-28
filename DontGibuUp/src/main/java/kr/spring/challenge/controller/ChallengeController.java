@@ -149,9 +149,6 @@ public class ChallengeController {
 			isJoined = joinList.stream().anyMatch(join -> join.getChal_num() == chal_num);
 		}
 
-		// 현재 참가 중인 인원 수 조회
-		int currentParticipants = challengeService.countCurrentParticipants(chal_num);
-
 		// 챌린지 리뷰 가져오기
 		List<ChallengeReviewVO> reviewList = challengeService.selectChallengeReviewList(chal_num);
 		double averageRating = reviewList.stream().mapToInt(ChallengeReviewVO::getChal_rev_grade).average().orElse(0.0);
@@ -161,7 +158,6 @@ public class ChallengeController {
 		ModelAndView mav = new ModelAndView("challengeView");
 		mav.addObject("challenge", challenge);
 		mav.addObject("isJoined", isJoined);
-		mav.addObject("currentParticipants", currentParticipants);
 		mav.addObject("reviewList", reviewList);
 		mav.addObject("averageRating", averageRating);
 		mav.addObject("reviewCount", reviewCount);
@@ -175,6 +171,7 @@ public class ChallengeController {
 	// 챌린지 참가 폼
 	@GetMapping("/challenge/join/write")
 	public String joinForm(@RequestParam("chal_num") long chal_num, HttpSession session, Model model) {
+		log.info("chal_num = {}",chal_num);
 		ChallengeVO challengeVO = challengeService.selectChallenge(chal_num);
 		List<DonationCategoryVO> categories = categoryService.selectListNoPage();
 
@@ -299,10 +296,6 @@ public class ChallengeController {
 			ChallengeReviewVO review = challengeService.selectChallengeReviewByMemberAndChallenge(reviewCheckMap);
 			boolean hasReview = review != null;
 
-			// 챌린지 참여 인원
-			long chal_num = challengeJoin.getChal_num();
-			int total_count = challengeService.countCurrentParticipants(chal_num);
-
 			// 챌린지 개설자 여부 확인 및 설정
 			ChallengeVO challenge = challengeService.selectChallenge(challengeJoin.getChal_num());
 			boolean isHost = challenge.getMem_num() == member.getMem_num(); // 챌린지 개설자 여부 확인
@@ -310,12 +303,12 @@ public class ChallengeController {
 
 			// 챌린지 데이터 추가
 			challengeData.put("challengeJoin", challengeJoin);
+			challengeData.put("joinNum", challenge.getChal_join());			
 			challengeData.put("achieveRate", achieveRate);
 			challengeData.put("returnPoint", numberFormat.format(returnPoint));
 			challengeData.put("donaAmount", numberFormat.format(donaAmount));
 			challengeData.put("formattedFee", numberFormat.format(chal_fee));
 			challengeData.put("hasReview", hasReview);
-			challengeData.put("total_count", total_count);
 			challengeData.put("isHost", isHost);
 
 			return challengeData;
@@ -704,9 +697,6 @@ public class ChallengeController {
 		Map<String, Object> map = new HashMap<>();
 		map.put("chal_num", chal_num);
 
-		// 현재 참가 중인 인원 수 조회
-		int currentParticipants = challengeService.countCurrentParticipants(chal_num);
-
 		// 참여금을 포맷팅
 		NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
 		String formattedFee = numberFormat.format(challenge.getChal_fee());
@@ -714,7 +704,6 @@ public class ChallengeController {
 		ModelAndView mav = new ModelAndView("adminChallengeDetail");
 		mav.addObject("challenge", challenge);
 		mav.addObject("formattedFee", formattedFee);
-		mav.addObject("currentParticipants", currentParticipants);
 
 		return mav;
 	}

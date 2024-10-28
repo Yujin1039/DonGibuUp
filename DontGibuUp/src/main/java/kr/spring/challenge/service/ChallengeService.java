@@ -1,11 +1,8 @@
 package kr.spring.challenge.service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-
-import com.siot.IamportRestClient.exception.IamportResponseException;
 
 import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.challenge.vo.ChallengeFavVO;
@@ -27,8 +24,6 @@ public interface ChallengeService {
 	//동일 챌린지의 모든 결제,참가 취소 및 챌린지 삭제
     public void cancelChallenge(Map<String,Object> data);
 	public void deleteChalPhoto(Long chal_num);
-	//참가 인원수 조회
-	public int countCurrentParticipants(long chal_num);
 	
 	//*챌린지 참가*//
 	public void insertChallengeJoin(ChallengeJoinVO chalJoinVO, ChallengePaymentVO chalPayVO);

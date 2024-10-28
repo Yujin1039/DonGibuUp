@@ -131,18 +131,17 @@ public class ChallengeServiceImpl implements ChallengeService{
 		challengeMapper.deleteChalPhoto(chal_num);
 	}
 
-	//참가 인원수 조회
-	@Override
-	public int countCurrentParticipants(long chal_num) {
-		return challengeMapper.countCurrentParticipants(chal_num);
-	}
-
 	//*챌린지 참가*//
 	@Override
 	public void insertChallengeJoin(ChallengeJoinVO chalJoinVO, ChallengePaymentVO chalPayVO) {
+		//챌린지 참가인원 업데이트
+		challengeMapper.addChallengeJoinNum(chalJoinVO.getChal_num());
+		
 		//챌린지 참가 정보 저장
 		chalJoinVO.setChal_joi_num(challengeMapper.selectChal_joi_num());
 		challengeMapper.insertChallengeJoin(chalJoinVO);
+		
+		//챌린지 결제 정보 저장
 		chalPayVO.setChal_joi_num(chalJoinVO.getChal_joi_num());
 		challengeMapper.insertChallengePayment(chalPayVO);
 
@@ -373,6 +372,8 @@ public class ChallengeServiceImpl implements ChallengeService{
 		challengeMapper.updateChalPaymentStatus(payVO.getChal_joi_num());
 		//챌린지 참가 상태 - 취소
 		challengeMapper.updateChallengeJoinStatus(payVO.getChal_joi_num());
+		//챌린지 참가인원 변경
+		challengeMapper.deleteChallengeJoinNum(chal_num);
 
 		//사용 포인트 복구
 		int chal_point = payVO.getChal_point();		
