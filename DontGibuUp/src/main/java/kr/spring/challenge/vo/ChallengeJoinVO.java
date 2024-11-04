@@ -42,4 +42,5 @@ public class ChallengeJoinVO {
     private String mem_photo;   //회원 프로필
     private int reported_num;	//회원별 제보된 인증 수
     private boolean isHost;  	//챌린지 개설자 여부
+    private boolean isPub;
 }

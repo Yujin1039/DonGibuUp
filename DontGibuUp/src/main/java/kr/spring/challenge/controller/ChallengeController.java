@@ -296,20 +296,18 @@ public class ChallengeController {
 			ChallengeReviewVO review = challengeService.selectChallengeReviewByMemberAndChallenge(reviewCheckMap);
 			boolean hasReview = review != null;
 
-			// 챌린지 개설자 여부 확인 및 설정
+			// 챌린지 개설자 여부 확인 및 설정, 단체 챌린지 여부 확인
 			ChallengeVO challenge = challengeService.selectChallenge(challengeJoin.getChal_num());
-			boolean isHost = challenge.getMem_num() == member.getMem_num(); // 챌린지 개설자 여부 확인
-			challengeJoin.setHost(isHost); // 챌린지 개설자 여부 설정
+			challengeJoin.setHost(challenge.getMem_num() == member.getMem_num()); // 챌린지 개설자 여부 설정
+			challengeJoin.setPub(challenge.getChal_public() == 0 ? true:false);
 
 			// 챌린지 데이터 추가
-			challengeData.put("challengeJoin", challengeJoin);
-			challengeData.put("joinNum", challenge.getChal_join());			
+			challengeData.put("challengeJoin", challengeJoin);		
 			challengeData.put("achieveRate", achieveRate);
 			challengeData.put("returnPoint", numberFormat.format(returnPoint));
 			challengeData.put("donaAmount", numberFormat.format(donaAmount));
 			challengeData.put("formattedFee", numberFormat.format(chal_fee));
 			challengeData.put("hasReview", hasReview);
-			challengeData.put("isHost", isHost);
 
 			return challengeData;
 		}).collect(Collectors.toList());

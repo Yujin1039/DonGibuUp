@@ -26,7 +26,7 @@ public class SocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(
 			WebSocketSession session) throws Exception {
-		log.debug(session.getId() + " 연결 됨");
+		log.debug("{} 연결 됨",session.getId());
 		users.put(session.getId(), session);
 	}
 

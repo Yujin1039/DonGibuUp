@@ -212,7 +212,7 @@ function payAndEnroll2() {
 															window.location.href = pageContextPath + '/challenge/join/list?status=pre';
 														}
 													} else if (param.result == 'maxExceeded') {
-														alert(`챌린지[${chalTitle}] 모집이 마감되었습니다.`);
+														alert(`챌린지[${chalTitle}] ${param.message}`);
 														window.location.replace('/challenge/detail?chal_num=${chal_num}');														
 													} else {
 														alert('참가 정보 저장 중 오류가 발생했습니다.');

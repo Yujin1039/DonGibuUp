@@ -184,7 +184,7 @@ public class ChallengeServiceImpl implements ChallengeService{
 	public void isMaxParticipants(Long chal_num) {
 		//락 설정
 		ChallengeVO challenge = challengeMapper.selectChallengeForUpdate(chal_num);
-
+		
 		//챌린지 참가인원 업데이트
 		if(challenge.getChal_join() < challenge.getChal_max()) {
 			challengeMapper.addChallengeJoinNum(chal_num);			

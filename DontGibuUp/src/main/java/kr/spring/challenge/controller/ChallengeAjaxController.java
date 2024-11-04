@@ -305,7 +305,7 @@ public class ChallengeAjaxController {
 		this.impClient = new IamportClient(apiKey,secretKey);
 	}
 	
-	// 결제 인원 확인하기
+	// 결제 전 참가 인원 확인하기
 	@PostMapping("/challenge/checkJoinNum")
 	@ResponseBody
 	public Map<String,Boolean> checkJoinNum(Long chal_num){
@@ -418,8 +418,15 @@ public class ChallengeAjaxController {
 					impClient.cancelPaymentByImpUid(cancelData);
 				}				
 				mapJson.put("result", "maxExceeded");
+				mapJson.put("message", e.getMessage());
 			}catch (Exception e) {
 				log.error("챌린지 참가 및 결제 정보 저장 중 오류 발생", e);
+				//결제 취소 요청하기
+				if(chalPayPrice > 0) {
+					String imp_uid = (String) data.get("od_imp_uid");
+					CancelData cancelData = new CancelData(imp_uid, true);
+					impClient.cancelPaymentByImpUid(cancelData);
+				}
 				mapJson.put("result", "error");
 				mapJson.put("message", "챌린지 참가 및 결제 정보 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.");
 			}

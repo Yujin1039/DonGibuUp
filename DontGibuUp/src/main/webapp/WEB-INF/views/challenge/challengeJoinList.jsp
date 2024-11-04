@@ -22,7 +22,7 @@
 			<c:forEach var="entry" items="${challengesByMonth}">
 				<c:forEach var="challengeData" items="${entry.value}">
 					<c:set var="challengeJoin" value="${challengeData.challengeJoin}" />
-					<div class="challenge-card ${challengeData.isHost ? 'host-card' : 'participant-card'}">					
+					<div class="challenge-card ${challengeJoin.host ? 'host-card' : 'participant-card'}">					
 						<div class="card-header">
 						<h3 style="color: #5a6f80;">
 							<a href="${pageContext.request.contextPath}/challenge/detail?chal_num=${challengeJoin.chal_num}" >
@@ -39,7 +39,7 @@
 									</c:when>
 									<c:when test="${status == 'on'}">
 										<a class="orange-custom" href="${pageContext.request.contextPath}/challenge/verify/list?chal_num=${challengeJoin.chal_num}&chal_joi_num=${challengeJoin.chal_joi_num}&status=${status}">인증내역</a>
-										<c:if test="${challengeData.join_num > 1}">
+										<c:if test="${challengeJoin.pub}">
 											<a class="gray-custom chal_talk" href="#" data-chal-num="${challengeJoin.chal_num}"
 											data-chal-joi-num="${challengeJoin.chal_joi_num}" data-status="${status}">단체톡방</a>
 										</c:if>										

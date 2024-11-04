@@ -20,6 +20,10 @@ spring:
       maximum-pool-size: 10 #최대 커넥션 개수 설정
       max-lifetime: 1800000 #커넥션 풀에서 살아있을 수 있는 커넥션의 최대 수명시간 1,800초(30분)
       
+  redis:
+      host: localhost
+      port: 6379
+      
   messages:
     basename: messages.cyy,messages.jsy,messages.kbr,messages.khc,messages.lsy,messages.syj,messages.yhl
     encoding: UTF-8
