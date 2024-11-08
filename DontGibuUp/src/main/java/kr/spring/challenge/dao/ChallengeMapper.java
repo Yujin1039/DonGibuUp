@@ -126,15 +126,24 @@ public interface ChallengeMapper {
     public Long selectChat_id();
     //채팅 메시지 등록
     public void insertChallengeChat(ChallengeChatVO chalChatVO);
-    //읽지 않은 채팅 기록 저장
-    @Insert("INSERT INTO chal_chat_read (chal_num,chat_id,mem_num) VALUES (#{chal_num},#{chat_id},#{mem_num})")
-    public void insertChatRead(Map<String,Object> map);
+    //채팅 기록 로그 등록
+    @Insert("INSERT INTO chal_chat_read (chal_num,last_chat_id,mem_num) VALUES (#{chal_num},#{last_chat_id},#{mem_num})")
+    public void insertChatLog(Map<String,Long> map);
+    //채팅 기록 로그 업데이트
+    @Update("UPDATE chal_chat_read SET last_chat_id=#{last_chat_id} WHERE chal_num=#{chal_num} AND mem_num=#{mem_num}")
+    public void updateChatRead(Map<String,Object> map);
+    //마지막 방문 메시지 번호 가져오기
+    @Select("SELECT last_chat_id FROM chal_chat_read WHERE chal_num=#{chal_num} AND mem_num=#{mem_num}")
+    public Long selectLastChat_id(@Param("chal_num") Long chal_num,@Param("mem_num") Long mem_num);
+    //시작 메시지 번호 가져오기
+    @Select("SELECT MIN(last_chat_id) FROM chal_chat_read WHERE chal_num=#{chal_num}")
+    public Long selectFirstChat_id(Long chal_num);
+    //최신 메시지 번호 가져오기
+    @Select("SELECT MAX(last_chat_id) FROM chal_chat_read WHERE chal_num=#{chal_num}")
+    public Long selectLatestChat_id(Long chal_num);
     //채팅 메시지 읽기
     public List<ChallengeChatVO> selectChallengeChat(Map<String,Object> map);
-    //읽은 채팅 기록 삭제
-    @Delete("DELETE FROM chal_chat_read WHERE chal_num=#{chal_num} AND mem_num=#{mem_num}")
-    public void deleteChatRead(Map<String,Object> map);
-    //챌린지 종료시 채팅기록(chal_chat_read) 삭제
+    //챌린지 종료시 채팅 기록 로그(chal_chat_read) 삭제
     @Delete("DELETE FROM chal_chat_read WHERE chal_num=#{chal_num}")
     public void deleteChalChatRead(Long chal_num);
     //챌린지 종료시 채팅(chal_chat) 삭제

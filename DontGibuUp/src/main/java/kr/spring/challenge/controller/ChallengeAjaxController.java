@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,8 @@ import kr.spring.challenge.vo.ChallengePaymentVO;
 import kr.spring.challenge.vo.ChallengeVO;
 import kr.spring.challenge.vo.ChallengeVerifyRptVO;
 import kr.spring.challenge.vo.ChallengeVerifyVO;
+import kr.spring.config.websocket.SocketHandler;
+import kr.spring.config.websocket.WebSocketEventListener;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.MemberVO;
 import kr.spring.point.vo.PointVO;
@@ -574,40 +577,21 @@ public class ChallengeAjaxController {
 		if(user == null) {
 			mapJson.put("result", "logout");
 		}else {
+			//새로운 채팅 정보 저장
 			ChallengeChatVO chatVO = new ChallengeChatVO();
 			chatVO.setChal_num(chal_num);
 			chatVO.setChat_content(chat_content);
 			chatVO.setChat_filename(FileUtil.createFile(request, upload));
 			chatVO.setMem_num(user.getMem_num());
-
-			challengeService.insertChallengeChat(chatVO);
+			
+			//현재 접속 중인 채팅 멤버 정보 
+			Set<Long> mem_numList = WebSocketEventListener.getUsersInChatRoom(chal_num);
+			
+			//DB 반영
+			challengeService.insertChallengeChat(chatVO,mem_numList);
 
 			mapJson.put("result", "success");
 		}
-		return mapJson;
-	}
-
-	//채팅 메시지 읽어오기
-	@PostMapping("/challenge/join/chalReadChat")
-	@ResponseBody
-	public Map<String,Object> readChallengeChat(long chal_num,HttpSession session){
-		Map<String,Object> mapJson = new HashMap<>();
-
-		MemberVO user = (MemberVO) session.getAttribute("user");
-
-		if(user == null) {
-			mapJson.put("result", "logout");
-		}else {
-			Map<String,Object> map = new HashMap<>();
-			map.put("chal_num", chal_num);
-			map.put("mem_num", user.getMem_num());
-			List<ChallengeChatVO> chatList = challengeService.selectChallengeChat(map);
-
-			mapJson.put("result", "success");
-			mapJson.put("chatList", chatList);
-			mapJson.put("mem_num", user.getMem_num());
-		}
-
 		return mapJson;
 	}
 

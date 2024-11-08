@@ -298,36 +298,45 @@
 	<select id="selectChallengeChat" parameterType="map"
 		resultType="challengeChatVO">
 		SELECT 
-			<![CDATA[
-			REPLACE(REPLACE(chat_content,'<','&lt;'),'>','&gt;') chat_content,
+    		c.chat_id,
+    		c.chal_num,
+    		c.mem_num,
+    		<![CDATA[
+				REPLACE(REPLACE(c.chat_content,'<','&lt;'),'>','&gt;') chat_content,
 			]]>
-			chat_filename,
-			chat_date,
-			chat_readCount,
-			mem_nick,
-			mem_photo,
-			mem_num
-		FROM chal_chat
-		LEFT OUTER JOIN (
-			SELECT
-				chat_id,
-				COUNT(*) chat_readCount
-			FROM chal_chat_read
-			GROUP BY chat_id)
-		USING(chat_id)
-		JOIN member USING(mem_num)
-		LEFT OUTER JOIN member_detail USING(mem_num)
-		WHERE chal_num=#{chal_num}
-		<if test="mem_num != null">
-		AND TO_DATE(chat_date) >=
-			(SELECT 
-				TO_DATE(chal_joi_date)
-			FROM chal_join
-			WHERE chal_num=#{chal_num} AND chal_joi_status = 0 
-			AND mem_num=#{mem_num})
-		</if>		
-		ORDER BY chat_date ASC
-	</select>
+    		c.chat_filename,
+    		c.chat_date,
+    		COUNT(r.last_chat_id) AS chat_readCount,
+    		m.mem_nick,
+    		de.mem_photo
+		FROM chal_chat c
+		LEFT JOIN chal_chat_read r
+		ON c.chal_num = r.chal_num AND <![CDATA[r.last_chat_id < c.chat_id]]>
+		JOIN member m
+		ON c.mem_num=m.mem_num
+		LEFT JOIN member_detail de
+		ON c.mem_num=de.mem_num
+		WHERE 
+    		c.chal_num = #{chal_num}
+			<if test="mem_num != null">
+			AND TO_DATE(chat_date) >=
+				(SELECT 
+					TO_DATE(chal_joi_date)
+				FROM chal_join
+				WHERE chal_num=#{chal_num} AND chal_joi_status = 0 
+				AND mem_num=#{mem_num})
+			</if>
+		GROUP BY 
+    		c.chat_id,
+    		c.chal_num,
+    		c.mem_num,
+    		c.chat_content,
+    		c.chat_filename,
+    		c.chat_date,
+    		m.mem_nick,
+    		de.mem_photo		
+		ORDER BY c.chat_date ASC
+	</select>	
 
 	<!-- 챌린지 인증 -->
 	<insert id="insertChallengeVerify"

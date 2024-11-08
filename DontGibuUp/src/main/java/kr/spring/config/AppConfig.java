@@ -18,12 +18,11 @@ import com.google.gson.Gson;
 import kr.spring.interceptor.LoginCheckInterceptor;
 import kr.spring.interceptor.MemStatusCheckInterceptor;
 import kr.spring.interceptor.WriterCheckInterceptor;
-import kr.spring.websocket.SocketHandler;
+import kr.spring.config.websocket.SocketHandler;
 
 //자바코드 기반 설정 클래스
 @Configuration
-@EnableWebSocket
-public class AppConfig implements WebMvcConfigurer,WebSocketConfigurer{
+public class AppConfig implements WebMvcConfigurer {
 	private LoginCheckInterceptor loginCheck;
 	private WriterCheckInterceptor writerCheck;
 	private MemStatusCheckInterceptor memStatusCheck;
@@ -116,17 +115,4 @@ public class AppConfig implements WebMvcConfigurer,WebSocketConfigurer{
     public Gson gson() {
         return new Gson();
     }
-    
-    //웹소켓 세팅
-  	@Override
-  	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-  		registry.addHandler(new SocketHandler(), "message-ws").setAllowedOrigins("*");		
-  	}
 }
-
-
-
-
-
-
-

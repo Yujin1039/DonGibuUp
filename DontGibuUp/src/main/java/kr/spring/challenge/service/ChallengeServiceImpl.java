@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -90,6 +91,12 @@ public class ChallengeServiceImpl implements ChallengeService{
 			chatVO.setChat_id(chat_id);
 			chatVO.setChat_date(chalVO.getChal_sdate());			
 			challengeMapper.insertChallengeChat(chatVO);
+			//채팅 기록 로그에 추가
+			Map<String,Long> map = new HashMap<>();
+			map.put("chal_num", chalVO.getChal_num());
+			map.put("last_chat_id",chat_id);
+			map.put("mem_num", payVO.getMem_num());
+			challengeMapper.insertChatLog(map);
 		}
 
 		//6. 챌린지 개설 알림
@@ -136,7 +143,8 @@ public class ChallengeServiceImpl implements ChallengeService{
 	@Override
 	public void insertChallengeJoin(ChallengeJoinVO chalJoinVO, ChallengePaymentVO chalPayVO) {
 		//챌린지 참가인원 업데이트
-		isMaxParticipants(chalJoinVO.getChal_num());
+		long chal_num = chalJoinVO.getChal_num();
+		isMaxParticipants(chal_num);
 		
 		//챌린지 참가 정보 저장
 		chalJoinVO.setChal_joi_num(challengeMapper.selectChal_joi_num());
@@ -145,6 +153,13 @@ public class ChallengeServiceImpl implements ChallengeService{
 		//챌린지 결제 정보 저장
 		chalPayVO.setChal_joi_num(chalJoinVO.getChal_joi_num());
 		challengeMapper.insertChallengePayment(chalPayVO);
+		
+		//채팅 기록 로그에 추가
+		Map<String,Long> map = new HashMap<>();
+		map.put("chal_num", chal_num);
+		map.put("mem_num", chalJoinVO.getMem_num());
+		map.put("last_chat_id",challengeMapper.selectFirstChat_id(chal_num));
+		challengeMapper.insertChatLog(map);
 
 		//결제시 포인트 변동사항 기록 
 		if(chalPayVO.getChal_point() > 0) {
@@ -489,27 +504,29 @@ public class ChallengeServiceImpl implements ChallengeService{
 	//*챌린지 채팅*//
 	//챌린지 채팅 메시지 넣기
 	@Override
-	public void insertChallengeChat(ChallengeChatVO chatVO) {
+	public void insertChallengeChat(ChallengeChatVO chatVO,Set<Long> memList) {
 		//chal_chat 테이블에 레코드 삽입
 		long chat_id = challengeMapper.selectChat_id();
 		chatVO.setChat_id(chat_id);
 		challengeMapper.insertChallengeChat(chatVO);
-		//chal_chat_read 테이블에 레코드 삽입
+		//chal_chat_read 테이블 업데이트
 		Map<String,Object> map = new HashMap<>();
 		map.put("chal_num", chatVO.getChal_num());
-		map.put("chat_id",chat_id);
-		for(ChallengeJoinVO vo:challengeMapper.selectJoinMemberList(map)) {			
-			map.put("mem_num", vo.getMem_num());
-			challengeMapper.insertChatRead(map);
+		for(long mem_num:memList) {			
+			map.put("mem_num", mem_num);
+			map.put("last_chat_id", chat_id);
+			challengeMapper.updateChatRead(map);
 		}		
 	}
 
-	//챌린지 채팅 메시지 읽기
+	//챌린지 채팅 전체 메시지 불러오기
 	@Override
 	public List<ChallengeChatVO> selectChallengeChat(Map<String, Object> map) {
-		//채팅 읽음 표시처리
-		challengeMapper.deleteChatRead(map);
-		//채팅 내용 불러오기				 
+		log.debug("map = {}",map);
+		//최근 읽은 채팅 업데이트 하기
+		long latest_chat_id = challengeMapper.selectLatestChat_id((Long) map.get("chal_num"));
+		map.put("last_chat_id", latest_chat_id);
+		challengeMapper.updateChatRead(map);
 		return challengeMapper.selectChallengeChat(map);
 	}
 
@@ -868,5 +885,10 @@ public class ChallengeServiceImpl implements ChallengeService{
 	@Override
 	public List<ChallengeVO> getExerciseChallenges() {
 		return challengeMapper.getExerciseChallenges();
+	}
+
+	@Override
+	public Long selectLastChat_id(Long chal_num, Long mem_num) {
+		return challengeMapper.selectLastChat_id(chal_num,mem_num);
 	}
 }

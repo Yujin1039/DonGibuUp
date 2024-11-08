@@ -1,6 +1,7 @@
-package kr.spring.websocket;
+package kr.spring.config.websocket;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.web.socket.CloseStatus;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SocketHandler extends TextWebSocketHandler {
 
-	private Map<String, WebSocketSession> users = new ConcurrentHashMap<String, WebSocketSession>();
+	private static Map<String, WebSocketSession> users = new ConcurrentHashMap<String, WebSocketSession>();
 	private ObjectMapper objectMapper = new ObjectMapper();
 
 	/*
@@ -86,6 +87,12 @@ public class SocketHandler extends TextWebSocketHandler {
             }
         }
     }
+    
+    // 현재 채팅방에 접속한 사용자 목록을 가져오는 메서드
+    public static Set<String> getCurrentUsers() {
+        return users.keySet();
+    }
+ 
 	
 	@Override
 	public void handleTransportError(

@@ -7,10 +7,12 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,10 +41,12 @@ import kr.spring.category.service.CategoryService;
 import kr.spring.category.vo.ChallengeCategoryVO;
 import kr.spring.category.vo.DonationCategoryVO;
 import kr.spring.challenge.service.ChallengeService;
+import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.challenge.vo.ChallengeJoinVO;
 import kr.spring.challenge.vo.ChallengeReviewVO;
 import kr.spring.challenge.vo.ChallengeVO;
 import kr.spring.challenge.vo.ChallengeVerifyVO;
+import kr.spring.config.websocket.SocketHandler;
 import kr.spring.member.vo.MemberVO;
 import kr.spring.util.FileUtil;
 import kr.spring.util.PagingUtil;
@@ -327,6 +331,7 @@ public class ChallengeController {
 	// 챌린지 채팅방 입장
 	@GetMapping("/challenge/join/chal_chatDetail")
 	public String joinChallengeChatRedirect(HttpSession session, Model model) {
+		log.debug("챌린지 채팅방 입장 메서드 실행");
 		long chal_num = (Long) session.getAttribute("chal_num");
 		model.addAttribute("chal_num", chal_num);
 
@@ -334,16 +339,26 @@ public class ChallengeController {
 		ChallengeVO challenge = challengeService.selectChallenge(chal_num);
 		model.addAttribute("chal_room_name", challenge.getChal_title());
 
-		// 채팅 참여 인원 수
+		// 채팅 참여 회원 목록
 		Map<String, Object> map = new HashMap<>();
 		map.put("chal_num", chal_num);
-		int chatJoinCount = challengeService.selectJoinMemberRowCount(map);
-		model.addAttribute("count", chatJoinCount);
-
-		// 채팅 참여 회원 목록
 		List<ChallengeJoinVO> list = challengeService.selectJoinMemberList(map);
 		model.addAttribute("list", list);
 
+		// 채팅 총 참여 인원 수
+		model.addAttribute("count", list.size());
+		
+		// 마지막 방문 메시지 번호 가져오기
+		MemberVO member = (MemberVO) session.getAttribute("user");
+		Long lastChat_id = challengeService.selectLastChat_id(chal_num, member.getMem_num());
+		model.addAttribute("lastChat_id", lastChat_id);
+		
+		// 채팅 정보 불러오기
+		MemberVO user = (MemberVO) session.getAttribute("user");
+		map.put("mem_num", user.getMem_num());
+		List<ChallengeChatVO> chatList = challengeService.selectChallengeChat(map);
+		model.addAttribute("chatList", chatList);
+		log.debug("<<chatList = {}>>",chatList);
 		return "chal_chatDetail";
 	}
 

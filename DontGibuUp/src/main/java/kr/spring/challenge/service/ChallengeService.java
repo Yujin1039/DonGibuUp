@@ -3,6 +3,9 @@ package kr.spring.challenge.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.ibatis.annotations.Param;
 
 import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.challenge.vo.ChallengeFavVO;
@@ -75,10 +78,12 @@ public interface ChallengeService {
 
     //*챌린지 채팅*//
     //채팅 메시지 등록
-    public void insertChallengeChat(ChallengeChatVO chalChatVO);
+    public void insertChallengeChat(ChallengeChatVO chalChatVO,Set<Long> memList);
     //채팅 메시지 읽기
     public List<ChallengeChatVO> selectChallengeChat(Map<String,Object> map);
-    //챌린지 종료시 채팅기록 삭제
+    //마지막 방문 메시지 번호 가져오기
+    public Long selectLastChat_id(Long chal_num,Long mem_num);
+    //챌린지 종료시 채팅기록 전체 삭제
     public void deleteChallengeChat(Long chal_num);
 	
     //*챌린지 좋아요*//
