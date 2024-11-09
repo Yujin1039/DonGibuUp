@@ -2,11 +2,15 @@ package kr.spring.challenge.controller;
 
 import kr.spring.challenge.vo.ChallengeChatVO;
 import kr.spring.config.websocket.WebSocketEventListener;
+import kr.spring.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -14,6 +18,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Controller
@@ -21,19 +28,8 @@ import org.springframework.stereotype.Controller;
 public class ChatController {
 
 	private final SimpMessagingTemplate messagingTemplate;
-	/*
-	
-
-    
-    // 현재 채팅방 접속자 수
-	public int getRoomUsersNum(Long chal_num) {
-		Set<String> users = roomUsers.get(chal_num);
-	    return (users != null) ? users.size() : 0;
-	}
-    */
 
     // 채팅 메시지를 전송하는 엔드포인트
-    //@SendTo("/challenge/")
 	@MessageMapping("/sendChat")
     public void sendMessage(ChallengeChatVO chatMessage) {		
 		log.debug("sendMessage 동작");
@@ -52,6 +48,7 @@ public class ChatController {
 		messagingTemplate.convertAndSend("/sub/challenge/"+chatMessage.getChal_num(), payload);
     }
 	
+	// 안 읽은 사람 수를 갱신하는 엔드포인트
 	@MessageMapping("/update-unread/{chal_num}/{mem_num}/{lastChatId}/{latest_chat_id}")
 	@SendTo("/sub/update/{chal_num}")
 	public Map<String,Long> readStatus(@DestinationVariable Long chal_num,@DestinationVariable Long mem_num,
@@ -62,5 +59,14 @@ public class ChatController {
 	    info.put("latest_chat_id", latest_chat_id);
 
 	    return info;
+	}
+	
+	// 서버에 이미지 업로드
+	@ResponseBody
+	@PostMapping("/challenge/uploadChatImage")
+	public String uploadImage(MultipartFile upload, HttpServletRequest request) throws IllegalStateException, IOException {
+		log.debug("upload = {}",upload);
+		String filename = FileUtil.createFile(request, upload);
+		return filename;
 	}
 }

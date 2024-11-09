@@ -568,9 +568,9 @@ public class ChallengeAjaxController {
 	//채팅 작성하기
 	@PostMapping("/challenge/join/chalWriteChat")
 	@ResponseBody
-	public Map<String,String> writeChallengeChat(long chal_num,String chat_content,
-			@RequestParam("upload") MultipartFile upload,HttpSession session,HttpServletRequest request) throws IllegalStateException, IOException{
+	public Map<String,String> writeChallengeChat(ChallengeChatVO chatVO,HttpSession session){
 		log.debug("chalWriteChat 메서드 진입");
+		log.debug("chatVO = {}",chatVO);
 		Map<String,String> mapJson = new HashMap<>();
 
 		MemberVO user = (MemberVO) session.getAttribute("user");
@@ -578,14 +578,10 @@ public class ChallengeAjaxController {
 			mapJson.put("result", "logout");
 		}else {
 			//새로운 채팅 정보 저장
-			ChallengeChatVO chatVO = new ChallengeChatVO();
-			chatVO.setChal_num(chal_num);
-			chatVO.setChat_content(chat_content);
-			chatVO.setChat_filename(FileUtil.createFile(request, upload));
 			chatVO.setMem_num(user.getMem_num());
 			
 			//현재 접속 중인 채팅 멤버 정보 
-			Set<Long> mem_numList = WebSocketEventListener.getUsersInChatRoom(chal_num);
+			Set<Long> mem_numList = WebSocketEventListener.getUsersInChatRoom(chatVO.getChal_num());
 			
 			//DB 반영
 			challengeService.insertChallengeChat(chatVO,mem_numList);

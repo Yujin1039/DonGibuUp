@@ -4,10 +4,10 @@ $(function() {
 	let latest_chat_id = $('.check-id:last').data('message-id');
 	let message_socket;//웹소켓 식별자
 	let stompClient;
-	
+
 	// 스크롤 제일 아래로 내리기
 	$('#chatting_message').scrollTop($('#chatting_message')[0].scrollHeight);
-	
+
 	if ($('#chatDetail').length > 0) {
 		connectWebSocket();
 	}
@@ -21,7 +21,7 @@ $(function() {
 		stompClient = Stomp.over(message_socket);
 
 		stompClient.connect({}, () => {
-			console.log('latest_chat_id : ' + latest_chat_id+', lastChatId: '+lastChatId);
+			console.log('latest_chat_id : ' + latest_chat_id + ', lastChatId: ' + lastChatId);
 			// 안 읽은 사람수 갱신 요청
 			stompClient.send(`/pub/update-unread/${chal_num}/${userMemNum}/${lastChatId}/${latest_chat_id}`, {});
 			// 새 채팅 불러오기
@@ -102,43 +102,81 @@ $(function() {
 		formData.append('chat_date', formattedDate);
 
 		let formObject = {};
+		const uploadPromises = [];
 		formData.forEach((value, key) => {
-			if (key === 'upload' && value.size === 0) {
-				return;
-			}
-			formObject[key] = value;
-		});
-		//웹 소켓 통신
-		stompClient.send(`/pub/sendChat`, {}, JSON.stringify(formObject));
-		//
-		// DB에 채팅 반영
-		$.ajax({
-			url: 'chalWriteChat',
-			type: 'post',
-			data: formData,
-			processData: false,
-			contentType: false,
-			success: function(param) {
-				if (param.result == 'logout') {
-					alert('로그인 후 채팅 가능합니다.');
-					window.close();
-				} else if (param.result = 'success') {
-					//폼 초기화
-					$('#chat_content').val('');
-					$('#fileUpload').val('');
-					$('.previewChatImage').hide();
+			if (key === 'upload') {
+				if (value.size === 0) {
+					return;
 				} else {
-					alert('채팅 메시지 등록 오류 발생');
+					let uploadData = new FormData();
+					uploadData.append(key, value);
+
+					const uploadPromise = sendDataToServer(uploadData)
+						.then(filename => {
+							console.log('filename: ' + filename);
+							if (filename != null) {
+								formObject['chat_filename'] = filename;
+							} else {
+								alert('파일 전송이 실패했으므로 재전송하시기 바랍니다.');
+								return;
+							}
+						});
+					uploadPromises.push(uploadPromise);
+				}
+			} else {
+				formObject[key] = value;
+			}
+		});
+
+		Promise.all(uploadPromises).then(() => {
+			console.log('업로드 완료:', formObject);
+			//웹 소켓 통신
+			stompClient.send(`/pub/sendChat`, {}, JSON.stringify(formObject));
+			// DB에 채팅 반영
+			$.ajax({
+				url: 'chalWriteChat',
+				type: 'post',
+				data: formObject,
+				success: function(param) {
+					if (param.result == 'logout') {
+						alert('로그인 후 채팅 가능합니다.');
+						window.close();
+					} else if (param.result = 'success') {
+						//폼 초기화
+						$('#chat_content').val('');
+						$('#fileUpload').val('');
+						$('.previewChatImage').hide();
+					} else {
+						alert('채팅 메시지 등록 오류 발생');
+						stompClient.disconnect();
+					}
+				},
+				error: function() {
+					alert('네트워크 오류');
 					stompClient.disconnect();
 				}
-			},
-			error: function() {
-				alert('네트워크 오류');
-				stompClient.disconnect();
-			}
-		});//end of ajax
+			});//end of ajax
+		});
+
 		e.preventDefault();
 	});
+
+	// 서버에 이미지 업로드, 이미지 URL 반환
+	async function sendDataToServer(formData) {
+		console.log('sendDataToServer 메서드 실행');
+		try {
+			const response = await fetch('/challenge/uploadChatImage', {
+				method: 'POST',
+				body: formData
+			});
+			const filename = await response.text();
+			console.log('filename: ' + filename);
+			return filename; // 함수에서 filename을 반환
+		} catch (error) {
+			console.error('error: ' + error);
+			return null; // 에러 발생 시 null 반환
+		}
+	}
 
 	// 공통 메시지 처리 함수
 	function addChatMessage(userMemNum, chatMessage) {
@@ -168,12 +206,12 @@ $(function() {
 		// 실제 메시지
 		output += '<div class="item">';
 		if (chatMessage.chat_filename != null && chatMessage.chat_content != null) {
-			output += `<img src="${contextPath}/upload/${item.chat_filename}" style="max-width: 200px; max-height: 200px;">`;
-			output += '<span>' + chatMessage.chat_content.replace(/\r\n/g, '<br>').replace(/\r/g, '<br>').replace(/\n/g, '<br>') + '</span>';
+			output += `<img src="${contextPath}/upload/${chatMessage.chat_filename}" style="max-width: 200px; max-height: 200px;">`;
+			output += `<p>${chatMessage.chat_content.replace(/\r\n/g, '<br>').replace(/\r/g, '<br>').replace(/\n/g, '<br>')}</p>`;
 		} else if (chatMessage.chat_content != null) {
-			output += '<span>' + chatMessage.chat_content.replace(/\r\n/g, '<br>').replace(/\r/g, '<br>').replace(/\n/g, '<br>') + '</span>';
+			output += `<p>${chatMessage.chat_content.replace(/\r\n/g, '<br>').replace(/\r/g, '<br>').replace(/\n/g, '<br>')}</p>`;
 		} else {
-			output += `<img src="${contextPath}/upload/${item.chat_filename}" style="max-width: 200px; max-height: 200px;">`;
+			output += `<img src="${contextPath}/upload/${chatMessage.chat_filename}" style="max-width: 200px; max-height: 200px;">`;
 		}
 		output += '</div>';
 
@@ -196,10 +234,10 @@ $(function() {
 
 	function updateUnreadStatus(info) {
 		// 읽지 않은 메시지 수 업데이트
-		console.log('updateUnreadStatus: '+info);
+		console.log('updateUnreadStatus: ' + info);
 		$('.check-id').filter(function() {
 			const messageId = parseInt($(this).data('message-id'), 10);
-			console.log('messageId: '+messageId+', last_chat_id: '+info.last_chat_id+', latest_chat_id: '+info.latest_chat_id);
+			console.log('messageId: ' + messageId + ', last_chat_id: ' + info.last_chat_id + ', latest_chat_id: ' + info.latest_chat_id);
 			return messageId > info.last_chat_id && messageId <= info.latest_chat_id;
 		}).each(function() {
 			const $readCount = $(this).find('.read-count');

@@ -267,17 +267,9 @@
 	<!-- 챌린지 채팅방 메시지 생성 -->
 	<insert id="insertChallengeChat" parameterType="challengeChatVO">
 		INSERT INTO chal_chat
-		(
-		<if test="chat_date != null">
-			chat_date,
-		</if>
-		chat_id, chal_num, mem_num, chat_content, chat_filename)
+		(chat_id, chal_num, mem_num, chat_content, chat_filename)
 		VALUES
-		(
-		<if test="chat_date != null">
-			#{chat_date},
-		</if>
-		#{chat_id},#{chal_num},#{mem_num},
+		(#{chat_id},#{chal_num},#{mem_num},
 		<if test="chat_content != null">
 			#{chat_content}
 		</if>

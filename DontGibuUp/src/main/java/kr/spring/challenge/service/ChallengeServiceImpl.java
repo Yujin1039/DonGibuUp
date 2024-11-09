@@ -10,15 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.siot.IamportRestClient.IamportClient;
 
 import kr.spring.challenge.dao.ChallengeMapper;
 import kr.spring.challenge.exception.MaxParticipantsExceededException;
@@ -37,7 +33,6 @@ import kr.spring.notify.service.NotifyService;
 import kr.spring.notify.vo.NotifyVO;
 import kr.spring.point.service.PointService;
 import kr.spring.point.vo.PointVO;
-import kr.spring.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

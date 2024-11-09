@@ -40,9 +40,9 @@
 	<div id="chatting_message">
 		<c:set var="chat_date" value="${empty chat_date ? '' : chat_date}" />
 		<c:forEach var="chat" items="${chatList}">
-			<c:if test="${chat_date != chat.chat_date.split(' ')[0] && chat.chat_content.indexOf('@{common}') < 0}">
+			<c:if test="${chat_date != chat.chat_date.split(' ')[0] && (chat.chat_filename || chat.chat_content.indexOf('@{common}') < 0)}">
 				<div class="date-position">
-					<c:set var="chat_date" value="${chat.chat_date.split(' ')[0]}" />            			
+					<c:set var="chat_date" value="${chat.chat_date.split(' ')[0]}" />           			
             		<span>${chat_date}</span>
 				</div>				
 			</c:if>
@@ -67,13 +67,17 @@
 						<div class="space-clear"></div>
 						${chat.mem_nick}
 						<div class="space-message">
-							<div class="item">
-								<c:choose>
+							<div class="item">								
+								<c:choose>									
 									<c:when test="${empty chat.chat_filename}">
-										<span>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</span>								
+										<p>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</p>								
+									</c:when>									
+									<c:when test="${empty chat.chat_content}">
+										<img src="${contextPath}/upload/${chat.chat_filename}" style="max-width: 200px; max-height: 200px;">
 									</c:when>
 									<c:otherwise>
 										<img src="${contextPath}/upload/${chat.chat_filename}" style="max-width: 200px; max-height: 200px;">
+										<p>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</p>
 									</c:otherwise>
 								</c:choose>
 							</div>
@@ -91,7 +95,18 @@
 				<c:otherwise>
 					<div class="from-position check-id" data-message-id="${chat.chat_id}">
 						<div class="item">
-							<span>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</span>
+							<c:choose>									
+								<c:when test="${empty chat.chat_filename}">
+									<p>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</p>								
+								</c:when>									
+								<c:when test="${empty chat.chat_content}">
+									<img src="${contextPath}/upload/${chat.chat_filename}" style="max-width: 200px; max-height: 200px;">
+								</c:when>
+								<c:otherwise>
+									<img src="${contextPath}/upload/${chat.chat_filename}" style="max-width: 200px; max-height: 200px;">
+									<p>${fn:replace(fn:replace(fn:replace(chat.chat_content, '\\r\\n', '<br>'), '\\r', '<br>'), '\\n', '<br>')}</p>
+								</c:otherwise>
+							</c:choose>
 						</div>
 						<div class="item2">
 						<c:if test="${chat.chat_readCount != 0}">
