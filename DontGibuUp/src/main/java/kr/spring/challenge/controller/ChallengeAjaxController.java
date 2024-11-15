@@ -1,7 +1,6 @@
 package kr.spring.challenge.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -43,11 +41,8 @@ import kr.spring.challenge.vo.ChallengePaymentVO;
 import kr.spring.challenge.vo.ChallengeVO;
 import kr.spring.challenge.vo.ChallengeVerifyRptVO;
 import kr.spring.challenge.vo.ChallengeVerifyVO;
-import kr.spring.config.websocket.SocketHandler;
-import kr.spring.config.websocket.WebSocketEventListener;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.MemberVO;
-import kr.spring.point.vo.PointVO;
 import kr.spring.util.FileUtil;
 import kr.spring.util.PagingUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -111,7 +106,6 @@ public class ChallengeAjaxController {
 			list = Collections.emptyList();
 		}
 
-		MemberVO member = (MemberVO) session.getAttribute("user");
 		Map<String, Object> mapJson = new HashMap<>();
 
 		mapJson.put("freqOrder", freqOrder);
@@ -580,8 +574,8 @@ public class ChallengeAjaxController {
 			//새로운 채팅 정보 저장
 			chatVO.setMem_num(user.getMem_num());
 			
-			//현재 접속 중인 채팅 멤버 정보 
-			Set<Long> mem_numList = WebSocketEventListener.getUsersInChatRoom(chatVO.getChal_num());
+			//현재 접속 중인 채팅 멤버 정보 			
+			Set<Long> mem_numList = challengeService.getUsersInChatRoom(chatVO.getChal_num());
 			
 			//DB 반영
 			challengeService.insertChallengeChat(chatVO,mem_numList);

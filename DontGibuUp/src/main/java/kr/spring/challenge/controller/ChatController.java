@@ -1,7 +1,7 @@
 package kr.spring.challenge.controller;
 
+import kr.spring.challenge.service.ChallengeService;
 import kr.spring.challenge.vo.ChallengeChatVO;
-import kr.spring.config.websocket.WebSocketEventListener;
 import kr.spring.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -27,13 +26,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ChatController {
 
-	private final SimpMessagingTemplate messagingTemplate;
+	private final SimpMessagingTemplate messagingTemplate;	
+	private final ChallengeService challengeService;
 
     // 채팅 메시지를 전송하는 엔드포인트
 	@MessageMapping("/sendChat")
     public void sendMessage(ChallengeChatVO chatMessage) {		
 		log.debug("sendMessage 동작");
-		int num = WebSocketEventListener.getUserNumInChatRoom(chatMessage.getChal_num());
+		long num = challengeService.getUserNumInChatRoom(chatMessage.getChal_num());
 		
 		Map<String,Object> payload = new HashMap<>(); 
 		payload.put("mem_num", chatMessage.getMem_num());
@@ -48,7 +48,7 @@ public class ChatController {
 		messagingTemplate.convertAndSend("/sub/challenge/"+chatMessage.getChal_num(), payload);
     }
 	
-	// 안 읽은 사람 수를 갱신하는 엔드포인트
+	// 채팅방 입장시 안 읽은 사람 수를 갱신하는 엔드포인트
 	@MessageMapping("/update-unread/{chal_num}/{mem_num}/{lastChatId}/{latest_chat_id}")
 	@SendTo("/sub/update/{chal_num}")
 	public Map<String,Long> readStatus(@DestinationVariable Long chal_num,@DestinationVariable Long mem_num,

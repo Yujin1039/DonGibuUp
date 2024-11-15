@@ -149,11 +149,13 @@ $(function() {
 					} else {
 						alert('채팅 메시지 등록 오류 발생');
 						stompClient.disconnect();
+						window.close();
 					}
 				},
 				error: function() {
 					alert('네트워크 오류');
 					stompClient.disconnect();
+					window.close();
 				}
 			});//end of ajax
 		});

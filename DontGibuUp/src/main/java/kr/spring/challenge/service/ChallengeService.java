@@ -85,7 +85,11 @@ public interface ChallengeService {
     public Long selectLastChat_id(Long chal_num,Long mem_num);
     //챌린지 종료시 채팅기록 전체 삭제
     public void deleteChallengeChat(Long chal_num);
-	
+    //같은 채팅방의 현재 접속 인원
+    public Set<Long> getUsersInChatRoom(Long chal_num);
+    //같은 채팅방의 현재 접속 멤버
+    public long getUserNumInChatRoom(Long chal_num);
+    
     //*챌린지 좋아요*//
     public ChallengeFavVO selectFav(ChallengeFavVO fav);
     public Integer selectFavCount(Long chal_num);

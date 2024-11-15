@@ -13,7 +13,9 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.spring.challenge.dao.ChallengeMapper;
@@ -33,23 +35,21 @@ import kr.spring.notify.service.NotifyService;
 import kr.spring.notify.vo.NotifyVO;
 import kr.spring.point.service.PointService;
 import kr.spring.point.vo.PointVO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class ChallengeServiceImpl implements ChallengeService{
 
-	@Autowired
-	ChallengeMapper challengeMapper;
-	@Autowired
-	MemberMapper memberMapper;
-	@Autowired
-	PointService pointService;
-	@Autowired
-	MemberService memberService;
-	@Autowired
-	NotifyService notifyService;
+	private final ChallengeMapper challengeMapper;
+	private final MemberMapper memberMapper;
+	private final PointService pointService;
+	private final MemberService memberService;
+	private final NotifyService notifyService;
+	private final RedisTemplate<String, Long> redisTemplate;
 	@Autowired
 	private ServletContext servletContext;
 
@@ -189,7 +189,8 @@ public class ChallengeServiceImpl implements ChallengeService{
 		//알림 로그 찍기
 		notifyService.insertNotifyLog(notifyVO, dynamicValues);
 	}
-
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
 	public void isMaxParticipants(Long chal_num) {
 		//락 설정
@@ -553,7 +554,19 @@ public class ChallengeServiceImpl implements ChallengeService{
 			}
 		}
 	}
-
+	
+	// 같은 채팅방의 현재 접속 인원
+	@Override
+	public long getUserNumInChatRoom(Long chal_num) {
+		return redisTemplate.opsForSet().size(String.valueOf(chal_num));
+	}
+	
+	// 같은 채팅방의 현재 접속 멤버
+	@Override
+	public Set<Long> getUsersInChatRoom(Long chal_num) {
+		return redisTemplate.opsForSet().members(String.valueOf(chal_num));
+	}
+	
 	//*챌린지 좋아요*//
 	@Override
 	public ChallengeFavVO selectFav(ChallengeFavVO fav) {
